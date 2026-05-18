@@ -234,16 +234,12 @@ v1 detects from `hooks/hooks.json` only; `scripts/**/*.sh` parsing comes in v1.1
 │   ├── snapshot/
 │   │   ├── claude/              # tokenized Claude profile files
 │   │   └── codex/               # tokenized Codex profile files
-│   ├── claude/
-│   │   ├── version.json         # timestamp, file count, byte count, host
-│   │   └── dependencies.json    # declared external deps (Claude profile)
-│   └── codex/
-│       ├── version.json
-│       └── dependencies.json
-└── manifest.json                # registry: devices[name][profile] → DeviceVersion
+│   ├── version.json             # { claude: { pushedAt, host, ... }, codex: { ... } }
+│   └── dependencies.json        # { claude: { dependencies: {...} }, codex: { ... } }
+└── manifest.json                # { version: 2, devices: { <name>: { claude: ..., codex: ... } } }
 ```
 
-One device holds both `claude` and `codex` snapshots side-by-side — same device name, separate profile subtrees. `pull` always reads `<source>/snapshot/<your-local-profile>/`, so cross-profile pulls are blocked by construction.
+One device holds both `claude` and `codex` snapshots side-by-side. Metadata files (`version.json`, `dependencies.json`) live at the device root and are keyed by profile internally, mirroring the manifest's shape. `pull` always reads `<source>/snapshot/<your-local-profile>/`, so cross-profile pulls are blocked by construction.
 
 One git commit on the hub = one profile push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/agent-handoff:pull --from X` always applies X's snapshot for the current profile atomically.
 
