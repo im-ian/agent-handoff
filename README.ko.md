@@ -212,14 +212,13 @@ Hub의 git commit 하나 = 한 디바이스의 push 한 번. **N개 디바이스
   "profile": "claude",
   "hubRemote": "https://github.com/<you>/<hub>.git",
   "appDir": "/Users/<you>/.claude",
-  "claudeDir": "/Users/<you>/.claude",
   "scope": { "include": ["agents/**", "..."], "optIn": [], "excludeExtra": [] },
   "secretPolicy": { "allow": [] },
   "substitutions": []
 }
 ```
 
-`AGENT_HANDOFF_HOME` 환경변수로 config/hub 위치 변경 가능 (기본 `~/.agent-handoff/`) — 안전한 시범 실행(`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`)이나 공유 환경에서의 사용자별 격리에 유용. 기존 `CLAUDE_HANDOFF_HOME`과 `~/.claude-handoff` 설치도 계속 지원합니다.
+`AGENT_HANDOFF_HOME` 환경변수로 config/hub 위치 변경 가능 (기본 `~/.agent-handoff/`) — 안전한 시범 실행(`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`)이나 공유 환경에서의 사용자별 격리에 유용.
 
 ---
 

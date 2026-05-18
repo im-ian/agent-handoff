@@ -51,20 +51,18 @@ export function getProfile(name: ProfileName | undefined): AgentProfile {
   return PROFILES[name ?? 'claude'];
 }
 
-export function resolveConfigAppDir(cfg: Pick<DeviceConfig, 'profile' | 'appDir' | 'claudeDir'>): string {
+export function resolveConfigAppDir(cfg: Pick<DeviceConfig, 'profile' | 'appDir'>): string {
   if (cfg.appDir) return cfg.appDir;
-  if ((cfg.profile ?? 'claude') === 'claude' && cfg.claudeDir) return cfg.claudeDir;
   return getProfile(cfg.profile).defaultDir();
 }
 
 export function normalizeConfigShape(raw: unknown): DeviceConfig {
   const cfg = raw as DeviceConfig;
   const profile = cfg.profile ?? 'claude';
-  const appDir = cfg.appDir ?? (profile === 'claude' ? cfg.claudeDir : undefined) ?? getProfile(profile).defaultDir();
+  const appDir = cfg.appDir ?? getProfile(profile).defaultDir();
   return {
     ...cfg,
     profile,
     appDir,
-    claudeDir: profile === 'claude' ? (cfg.claudeDir ?? appDir) : undefined,
   };
 }

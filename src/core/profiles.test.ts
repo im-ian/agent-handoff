@@ -10,19 +10,17 @@ import {
 } from './profiles.js';
 
 describe('agent profiles', () => {
-  it('keeps legacy claude configs working', () => {
+  it('defaults profile to claude and backfills appDir when missing', () => {
     const cfg = normalizeConfigShape({
       device: 'macbook',
       hubRemote: 'git@github.com:me/hub.git',
-      claudeDir: '/Users/me/.claude',
       substitutions: [],
       scope: DEFAULT_SCOPE,
       secretPolicy: { allow: [] },
     });
 
     expect(cfg.profile).toBe('claude');
-    expect(cfg.appDir).toBe('/Users/me/.claude');
-    expect(cfg.claudeDir).toBe('/Users/me/.claude');
+    expect(cfg.appDir).toBe(path.join(os.homedir(), '.claude'));
   });
 
   it('normalizes codex configs to the codex profile and app directory', () => {
@@ -38,7 +36,6 @@ describe('agent profiles', () => {
 
     expect(cfg.profile).toBe('codex');
     expect(cfg.appDir).toBe('/Users/me/.codex');
-    expect(cfg.claudeDir).toBeUndefined();
   });
 
   it('provides profile-specific defaults', () => {

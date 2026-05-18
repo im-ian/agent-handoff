@@ -3,9 +3,9 @@ import { parseGitHubRemote } from './hub-privacy.js';
 
 describe('parseGitHubRemote', () => {
   it('parses SSH form with .git suffix', () => {
-    expect(parseGitHubRemote('git@github.com:im-ian/claude-handoff.git')).toEqual({
+    expect(parseGitHubRemote('git@github.com:im-ian/agent-handoff.git')).toEqual({
       owner: 'im-ian',
-      repo: 'claude-handoff',
+      repo: 'agent-handoff',
     });
   });
 
@@ -17,9 +17,9 @@ describe('parseGitHubRemote', () => {
   });
 
   it('parses HTTPS form with embedded username', () => {
-    expect(parseGitHubRemote('https://im-ian@github.com/im-ian/claude-handoff.git')).toEqual({
+    expect(parseGitHubRemote('https://im-ian@github.com/im-ian/agent-handoff.git')).toEqual({
       owner: 'im-ian',
-      repo: 'claude-handoff',
+      repo: 'agent-handoff',
     });
   });
 

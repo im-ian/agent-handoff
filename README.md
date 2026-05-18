@@ -212,14 +212,13 @@ One git commit on the hub = one push from one device. **N devices × M versions*
   "profile": "claude",
   "hubRemote": "https://github.com/<you>/<hub>.git",
   "appDir": "/Users/<you>/.claude",
-  "claudeDir": "/Users/<you>/.claude",
   "scope": { "include": ["agents/**", "..."], "optIn": [], "excludeExtra": [] },
   "secretPolicy": { "allow": [] },
   "substitutions": []
 }
 ```
 
-`AGENT_HANDOFF_HOME` env var overrides the config/hub location (default `~/.agent-handoff/`) — useful for safe trial runs (`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments. Existing `CLAUDE_HANDOFF_HOME` and `~/.claude-handoff` installs remain supported.
+`AGENT_HANDOFF_HOME` env var overrides the config/hub location (default `~/.agent-handoff/`) — useful for safe trial runs (`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments.
 
 ---
 

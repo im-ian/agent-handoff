@@ -142,7 +142,7 @@ $AGENT_HANDOFF_HOME (default ~/.agent-handoff)/
 └── hub/               # local git clone of the hub repo
 ```
 
-Set `AGENT_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment without touching your real setup. `CLAUDE_HANDOFF_HOME` and an existing `~/.claude-handoff` directory remain supported for pre-rename installs. Combine with `handoff init --skip-clone` for a placeholder hub, then `handoff push --dry-run` to preview scope + scan + tokenization results.
+Set `AGENT_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment without touching your real setup. Combine with `handoff init --skip-clone` for a placeholder hub, then `handoff push --dry-run` to preview scope + scan + tokenization results.
 
 ### Device config (`~/.agent-handoff/config.json`)
 
@@ -152,7 +152,6 @@ Set `AGENT_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment wit
   "profile": "claude",
   "hubRemote": "git@github.com:user/my-claude-hub.git",
   "appDir": "/Users/jthefloor/.claude",
-  "claudeDir": "/Users/jthefloor/.claude",
   "substitutions": [
     { "from": "/Users/jthefloor", "to": "${HANDOFF_HOME}" },
     { "from": "jthefloor", "to": "${HANDOFF_USER}" }

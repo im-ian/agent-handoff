@@ -16,7 +16,6 @@ const configSchema = z.object({
   device: z.string().min(1),
   hubRemote: z.string().min(1),
   appDir: z.string().optional(),
-  claudeDir: z.string().optional(),
   substitutions: z.array(z.object({ from: z.string(), to: z.string() })),
   scope: z.object({
     include: z.array(z.string()),

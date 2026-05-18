@@ -22,9 +22,6 @@ export interface DeviceConfig {
   device: string;
   hubRemote: string;
   appDir: string;
-  // Legacy config key. Kept so existing ~/.claude-handoff/config.json files
-  // continue to read and write cleanly during the agent-handoff transition.
-  claudeDir?: string;
   substitutions: Substitution[];
   scope: ScopeConfig;
   secretPolicy: SecretPolicy;
