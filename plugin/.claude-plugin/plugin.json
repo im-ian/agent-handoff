@@ -1,6 +1,6 @@
 {
   "name": "agent-handoff",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Slash-command wrapper around the agent-handoff CLI — /handoff-init, /handoff-push, /handoff-pull, /handoff-diff, /handoff-status. Requires the `handoff` CLI on PATH (see repo README).",
   "author": {
     "name": "im-ian"
