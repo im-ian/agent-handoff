@@ -1,19 +1,20 @@
 {
-  "name": "claude-handoff",
-  "version": "0.0.1",
-  "description": "Slash-command wrapper around the claude-handoff CLI — /handoff-init, /handoff-push, /handoff-pull, /handoff-diff, /handoff-status. Requires the `handoff` CLI on PATH (see repo README).",
+  "name": "agent-handoff",
+  "version": "1.0.0",
+  "description": "Slash-command wrapper around the agent-handoff CLI — /handoff-init, /handoff-push, /handoff-pull, /handoff-diff, /handoff-status. Requires the `handoff` CLI on PATH (see repo README).",
   "author": {
     "name": "im-ian"
   },
-  "homepage": "https://github.com/im-ian/claude-handoff",
-  "repository": "https://github.com/im-ian/claude-handoff.git",
+  "homepage": "https://github.com/im-ian/agent-handoff",
+  "repository": "https://github.com/im-ian/agent-handoff.git",
   "license": "MIT",
   "keywords": [
     "sync",
     "handoff",
     "dotfiles",
     "cross-device",
-    "claude-code"
+    "claude-code",
+    "codex"
   ],
   "commands": ["./commands/"]
 }
