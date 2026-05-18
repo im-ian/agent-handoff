@@ -4,6 +4,7 @@ import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest } from '../core/git.js';
 import { detectDeps, groupByBinary, type DepRef } from '../core/dep-detect.js';
 import { readManifest, getInstallForPlatform, isInstalled } from '../core/dep-manifest.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 
 export interface DoctorOptions {
   verbose?: boolean;
@@ -24,7 +25,8 @@ export async function doctorCommand(opts: DoctorOptions): Promise<void> {
   await ensureClone(paths.hubDir, cfg.hubRemote).catch(() => undefined);
   await pullLatest(paths.hubDir).catch(() => undefined);
 
-  const refs = await detectDeps(cfg.claudeDir);
+  const profile = getProfile(cfg.profile);
+  const refs = await detectDeps(resolveConfigAppDir(cfg), profile.dependencyHookFiles);
   const grouped = groupByBinary(refs);
 
   if (grouped.size === 0) {

@@ -1,5 +1,5 @@
 ---
-description: Show claude-handoff sync state and all known devices
+description: Show agent-handoff sync state and all known devices
 ---
 
 Use the Bash tool to run:

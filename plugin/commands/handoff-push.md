@@ -1,5 +1,5 @@
 ---
-description: Push this machine's Claude Code setup to the hub
+description: Push this machine's agent setup to the hub
 argument-hint: "(no arguments — the slash command drives secret-scan decisions interactively)"
 allowed-tools: [Bash, Read, AskUserQuestion]
 ---
@@ -72,6 +72,6 @@ If the CLI exited non-zero, surface its stderr and offer to re-run `/handoff-pus
 
 ### Fallbacks
 
-- If `~/.claude-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
 - If Claude Code's safety hook denies `handoff push --allow-secrets` even after the user explicitly chose it (the user authorization is captured in the conversation), surface the hook's message and tell the user they can either (a) re-run `handoff push --allow-secrets` directly in their terminal, or (b) add a Bash permission rule to their Claude settings to allow it.
 - Never call `handoff push` *without* `--skip-on-secrets` or `--allow-secrets` when findings exist. Doing so triggers the CLI's per-file `prompts`, which hang through the Bash tool.

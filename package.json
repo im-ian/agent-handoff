@@ -1,7 +1,7 @@
 {
-  "name": "@im-ian/claude-handoff",
+  "name": "@im-ian/agent-handoff",
   "version": "1.0.0",
-  "description": "Hand off your Claude Code setup between devices — like Apple Handoff, but for ~/.claude/",
+  "description": "Hand off your agent setup between devices — like Apple Handoff, but for Claude Code and Codex config.",
   "type": "module",
   "bin": {
     "handoff": "./dist/index.js"
@@ -11,11 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/im-ian/claude-handoff.git"
+    "url": "git+https://github.com/im-ian/agent-handoff.git"
   },
-  "homepage": "https://github.com/im-ian/claude-handoff#readme",
+  "homepage": "https://github.com/im-ian/agent-handoff#readme",
   "bugs": {
-    "url": "https://github.com/im-ian/claude-handoff/issues"
+    "url": "https://github.com/im-ian/agent-handoff/issues"
   },
   "files": [
     "dist",
@@ -36,6 +36,8 @@
   "keywords": [
     "claude-code",
     "claude",
+    "codex",
+    "agents",
     "sync",
     "dotfiles",
     "handoff",

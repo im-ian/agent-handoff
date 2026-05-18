@@ -6,11 +6,13 @@ import prompts from 'prompts';
 import pc from 'picocolors';
 import { paths, readConfig, writeConfig } from '../core/config.js';
 import { ensureClone } from '../core/git.js';
-import { DEFAULT_SCOPE } from '../core/scope.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 import { pathExists } from '../core/fs-util.js';
-import type { DeviceConfig } from '../types.js';
+import type { DeviceConfig, ProfileName } from '../types.js';
 
 export interface InitOptions {
+  profile?: ProfileName;
+  appDir?: string;
   hub?: string;
   createHub?: string;
   device?: string;
@@ -20,8 +22,13 @@ export interface InitOptions {
 
 const DEVICE_NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/;
 const REPO_NAME_PATTERN = /^[A-Za-z0-9._-]{1,100}$/;
+const PROFILE_NAMES = new Set(['claude', 'codex']);
 
 export async function initCommand(opts: InitOptions): Promise<void> {
+  if (opts.profile && !PROFILE_NAMES.has(opts.profile)) {
+    console.error(pc.red(`Invalid profile "${opts.profile}". Expected "claude" or "codex".`));
+    process.exit(1);
+  }
   if (opts.hub && opts.createHub) {
     console.error(pc.red('--hub and --create-hub are mutually exclusive — pick one.'));
     process.exit(1);
@@ -33,8 +40,9 @@ export async function initCommand(opts: InitOptions): Promise<void> {
 
   const existing = await readConfig();
   const isUpdate = existing !== null;
+  const profileName = opts.profile ?? existing?.profile ?? 'claude';
   // Preserve scope/secretPolicy/substitutions on an update unless --force is passed.
-  const keepEditable = isUpdate && !opts.force;
+  const keepEditable = isUpdate && !opts.force && existing!.profile === profileName;
 
   if (isUpdate) {
     if (opts.force) {
@@ -59,7 +67,12 @@ export async function initCommand(opts: InitOptions): Promise<void> {
     .replace(/[^a-z0-9-]/g, '-');
   const defaultDevice = keepEditable ? existing!.device : hostDefault;
   const defaultHub = keepEditable ? existing!.hubRemote : '';
-  const claudeDir = existing?.claudeDir ?? path.join(os.homedir(), '.claude');
+  const profile = getProfile(profileName);
+  const appDir = opts.appDir
+    ? path.resolve(opts.appDir)
+    : keepEditable
+      ? resolveConfigAppDir(existing!)
+      : profile.defaultDir();
 
   const skipHubPrompt = Boolean(opts.hub || opts.createHub);
   const answers = await prompts(
@@ -96,16 +109,18 @@ export async function initCommand(opts: InitOptions): Promise<void> {
     process.exit(1);
   }
 
-  if (!(await pathExists(claudeDir))) {
-    console.log(pc.yellow(`⚠ ${claudeDir} does not exist yet — it will be created on first pull.`));
+  if (!(await pathExists(appDir))) {
+    console.log(pc.yellow(`⚠ ${appDir} does not exist yet — it will be created on first pull.`));
   }
 
   const config: DeviceConfig = {
+    profile: profileName,
     device,
     hubRemote,
-    claudeDir,
+    appDir,
+    claudeDir: profileName === 'claude' ? appDir : undefined,
     substitutions: keepEditable ? existing!.substitutions : [],
-    scope: keepEditable ? existing!.scope : structuredClone(DEFAULT_SCOPE),
+    scope: keepEditable ? existing!.scope : structuredClone(profile.defaultScope),
     secretPolicy: keepEditable ? existing!.secretPolicy : { allow: [] },
   };
 
@@ -115,8 +130,10 @@ export async function initCommand(opts: InitOptions): Promise<void> {
   // Summarize what actually changed on an update so the user can spot mistakes quickly.
   if (isUpdate) {
     const changes: string[] = [];
+    if (existing!.profile !== profileName) changes.push(`profile: ${existing!.profile} → ${profileName}`);
     if (existing!.device !== device) changes.push(`device: ${existing!.device} → ${device}`);
     if (existing!.hubRemote !== hubRemote) changes.push(`hub: ${existing!.hubRemote} → ${hubRemote}`);
+    if (resolveConfigAppDir(existing!) !== appDir) changes.push(`app dir: ${resolveConfigAppDir(existing!)} → ${appDir}`);
     if (opts.force) changes.push('scope/secretPolicy/substitutions: reset to defaults');
     if (changes.length > 0) {
       console.log(pc.dim('  changed: ' + changes.join('; ')));
@@ -210,7 +227,7 @@ async function createGitHubHub(name: string): Promise<string> {
         name,
         '--private',
         '--description',
-        'Private hub for syncing Claude Code setup across devices via claude-handoff',
+        'Private hub for syncing agent setup across devices via agent-handoff',
       ],
       { reject: false },
     );

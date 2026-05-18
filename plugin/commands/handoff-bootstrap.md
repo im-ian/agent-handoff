@@ -43,6 +43,6 @@ Summarize the final tally (`X succeeded, Y failed`). For any failures, surface t
 
 ### Fallbacks
 
-- If `~/.claude-handoff/config.json` is missing → `/handoff-init` first.
+- If `~/.agent-handoff/config.json` is missing → `/handoff-init` first.
 - If no manifest exists for this device → suggest `/handoff-deps add <name> --darwin "..." --linux "..."` to declare deps first.
 - If a Claude Code safety hook denies the install command (e.g. `sudo apt install`) → surface the hook message and tell the user to run `handoff bootstrap --yes` directly in their terminal.

@@ -24,7 +24,7 @@ const SYSTEM_TOOLS = new Set([
 
 export interface DepRef {
   binary: string;
-  file: string;       // relative to claudeDir, e.g. "hooks/hooks.json"
+  file: string;       // relative to the configured app dir, e.g. "hooks/hooks.json"
   line?: number;
   context: string;    // the offending command line (truncated)
 }
@@ -78,38 +78,44 @@ function findLine(raw: string, snippet: string): number | undefined {
   return undefined;
 }
 
-export async function detectDeps(claudeDir: string): Promise<DepRef[]> {
+export async function detectDeps(
+  appDir: string,
+  hookFiles: readonly string[] = ['hooks/hooks.json'],
+): Promise<DepRef[]> {
   const refs: DepRef[] = [];
-  const hooksFile = path.join(claudeDir, 'hooks', 'hooks.json');
 
-  let raw: string;
-  try {
-    raw = await fs.readFile(hooksFile, 'utf8');
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return refs;
-    throw err;
-  }
+  for (const hookFile of hookFiles) {
+    const hooksFile = path.join(appDir, hookFile);
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return refs;
-  }
+    let raw: string;
+    try {
+      raw = await fs.readFile(hooksFile, 'utf8');
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') continue;
+      throw err;
+    }
 
-  const commands: string[] = [];
-  collectCommandFields(parsed, commands);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      continue;
+    }
 
-  for (const cmd of commands) {
-    const exe = extractExecutable(cmd);
-    if (!exe) continue;
-    if (SYSTEM_TOOLS.has(exe)) continue;
-    refs.push({
-      binary: exe,
-      file: 'hooks/hooks.json',
-      line: findLine(raw, cmd),
-      context: cmd.length > 100 ? cmd.slice(0, 97) + '...' : cmd,
-    });
+    const commands: string[] = [];
+    collectCommandFields(parsed, commands);
+
+    for (const cmd of commands) {
+      const exe = extractExecutable(cmd);
+      if (!exe) continue;
+      if (SYSTEM_TOOLS.has(exe)) continue;
+      refs.push({
+        binary: exe,
+        file: hookFile,
+        line: findLine(raw, cmd),
+        context: cmd.length > 100 ? cmd.slice(0, 97) + '...' : cmd,
+      });
+    }
   }
 
   return refs;

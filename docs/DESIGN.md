@@ -1,4 +1,4 @@
-# claude-handoff — Design
+# agent-handoff — Design
 
 ## Problems we are solving
 
@@ -11,7 +11,7 @@ Hooks, settings, and sub-agent definitions regularly embed machine-specific lite
 When synced verbatim across PCs (work ↔ home), these break on the receiving device.
 
 ### P2 — Many devices, many versions
-A single user may run Claude Code on 3+ machines. A simple "one canonical source" model forces lossy merges. We need **N devices × M versions** — each device keeps its own history, and any device can selectively pull another device's state.
+A single user may run Claude Code or Codex on 3+ machines. A simple "one canonical source" model forces lossy merges. We need **N devices × M versions** — each device keeps its own history, and any device can selectively pull another device's state.
 
 ## Model
 
@@ -21,7 +21,7 @@ A single user may run Claude Code on 3+ machines. A simple "one canonical source
 <hub-repo>/
 ├── devices/
 │   ├── macbook-pro/
-│   │   ├── snapshot/           # tokenized ~/.claude/ subset
+│   │   ├── snapshot/           # tokenized profile directory subset
 │   │   │   ├── agents/
 │   │   │   ├── hooks/
 │   │   │   ├── skills/
@@ -53,7 +53,9 @@ Before pushing, we rewrite device-specific literals in text files to tokens:
 
 | Token                  | Replaces                                  |
 |------------------------|-------------------------------------------|
-| `${HANDOFF_CLAUDE}`    | `$HOME/.claude` (absolute path)            |
+| `${HANDOFF_CLAUDE}`    | `$HOME/.claude` for the Claude profile     |
+| `${HANDOFF_CODEX}`     | `$HOME/.codex` for the Codex profile       |
+| `${HANDOFF_APP}`       | reserved generic app-dir token             |
 | `${HANDOFF_HOME}`      | `$HOME`                                    |
 | `${HANDOFF_USER}`      | local username (`$USER`)                   |
 | `${HANDOFF_HOSTNAME}`  | local hostname                             |
@@ -77,7 +79,7 @@ Before any file leaves the device, `push` scans every scoped text file (binaries
 
 **Non-interactive fallback.** If stdin is not a TTY the scanner refuses to guess: the user must pass either `--skip-on-secrets` (auto-skip any flagged file) or `--allow-secrets` (bypass scanner entirely). This keeps CI / scripted pushes deterministic.
 
-**Policy persistence.** `DeviceConfig.secretPolicy.allow: string[]` is a per-device allowlist of relative paths the scanner should not inspect at all — intended for files where a token-shaped string is a deliberate template placeholder, not an actual credential. Additions to this list are manual (edit `~/.claude-handoff/config.json`) rather than auto-remembered from prompts, to avoid "click fatigue" turning into silent allowlist growth.
+**Policy persistence.** `DeviceConfig.secretPolicy.allow: string[]` is a per-device allowlist of relative paths the scanner should not inspect at all — intended for files where a token-shaped string is a deliberate template placeholder, not an actual credential. Additions to this list are manual (edit `~/.agent-handoff/config.json`) rather than auto-remembered from prompts, to avoid "click fatigue" turning into silent allowlist growth.
 
 ### Dependency tracking — declared external programs
 
@@ -115,10 +117,10 @@ Hooks (`hooks/hooks.json`) and scripts typically invoke external CLIs (`gh`, `jq
 
 ### Scope (what gets synced)
 
-**Default allowlist** (conservative — to avoid leaking unknown files):
+**Default allowlist** (conservative — to avoid leaking unknown files) is profile-specific:
 
-- `agents/`, `commands/`, `hooks/`, `skills/`, `rules/`, `mcp-configs/`
-- top-level `*.md` (e.g., `CLAUDE.md`, `AGENTS.md`)
+- Claude: `agents/`, `commands/`, `hooks/`, `skills/`, `rules/`, `mcp-configs/`, top-level `*.md`
+- Codex: `AGENTS.md`, `config.toml`, `hooks.json`, `rules/`, `skills/`, `commands/`, top-level `*.md`
 
 **Opt-in** (may include machine-specific state):
 
@@ -135,19 +137,21 @@ Hooks (`hooks/hooks.json`) and scripts typically invoke external CLIs (`gh`, `jq
 ### Local state
 
 ```
-$CLAUDE_HANDOFF_HOME (default ~/.claude-handoff)/
+$AGENT_HANDOFF_HOME (default ~/.agent-handoff)/
 ├── config.json        # device name, hub URL, tokens, scope overrides
 └── hub/               # local git clone of the hub repo
 ```
 
-Set `CLAUDE_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment without touching your real setup. Combine with `handoff init --skip-clone` for a placeholder hub, then `handoff push --dry-run` to preview scope + scan + tokenization results.
+Set `AGENT_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment without touching your real setup. `CLAUDE_HANDOFF_HOME` and an existing `~/.claude-handoff` directory remain supported for pre-rename installs. Combine with `handoff init --skip-clone` for a placeholder hub, then `handoff push --dry-run` to preview scope + scan + tokenization results.
 
-### Device config (`~/.claude-handoff/config.json`)
+### Device config (`~/.agent-handoff/config.json`)
 
 ```json
 {
   "device": "macbook-pro",
+  "profile": "claude",
   "hubRemote": "git@github.com:user/my-claude-hub.git",
+  "appDir": "/Users/jthefloor/.claude",
   "claudeDir": "/Users/jthefloor/.claude",
   "substitutions": [
     { "from": "/Users/jthefloor", "to": "${HANDOFF_HOME}" },
@@ -165,9 +169,9 @@ Set `CLAUDE_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment wi
 
 | Command | Purpose |
 |---------|---------|
-| `handoff init` | Register this device, clone/link hub repo, write local config |
+| `handoff init [--profile claude\|codex]` | Register this device, clone/link hub repo, write local config |
 | `handoff push [--dry-run]` | Tokenize + copy scoped files to `hub/devices/<this>/snapshot/`, commit, push; `--dry-run` reports scope/scan/size with zero side effects |
-| `handoff pull [--from <device>] [--confirm]` | Resolve + apply another device's snapshot to `~/.claude/`; `--confirm` shows a diff preview and asks y/N before applying |
+| `handoff pull [--from <device>] [--confirm]` | Resolve + apply another device's snapshot to the configured app directory; `--confirm` shows a diff preview and asks y/N before applying |
 | `handoff diff [--from <device>] [-p]` | Preview changes before a pull — token-aware, binary-aware, shows unified patches |
 | `handoff status` | Show current device, hub remote, known devices, last push timestamps |
 | `handoff doctor` | Diagnose missing external deps referenced by hooks |

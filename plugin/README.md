@@ -1,4 +1,4 @@
-# claude-handoff — Claude Code slash command plugin
+# agent-handoff — Claude Code slash command plugin
 
 Thin wrapper that exposes the `handoff` CLI as Claude Code slash commands.
 
@@ -18,7 +18,7 @@ Arguments are passed through via `$ARGUMENTS`, so `/handoff-pull --from work-pc 
 
 ### Requirements
 
-- `handoff` CLI on your PATH. From the repo root: `npm link` (simplest) or `pnpm link --global` (pnpm users, requires `pnpm setup` first). Once published: `npm install -g claude-handoff`.
+- `handoff` CLI on your PATH. From the repo root: `npm link` (simplest) or `pnpm link --global` (pnpm users, requires `pnpm setup` first). Once published: `npm install -g @im-ian/agent-handoff`.
 - Claude Code with `~/.claude/commands/` writable (the usual default).
 
 ### One-liner

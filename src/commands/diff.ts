@@ -5,6 +5,7 @@ import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest } from '../core/git.js';
 import { readManifest } from '../core/manifest.js';
 import { buildSubs, resolve as resolveTokens } from '../core/tokenize.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 import { listScopedFiles } from '../core/scope.js';
 import { pathExists } from '../core/fs-util.js';
 import { diffTrees } from '../core/diff-engine.js';
@@ -18,6 +19,8 @@ export interface DiffOptions {
 
 export async function diffCommand(opts: DiffOptions): Promise<void> {
   const cfg = await requireConfig();
+  const appDir = resolveConfigAppDir(cfg);
+  const profile = getProfile(cfg.profile);
   await ensureClone(paths.hubDir, cfg.hubRemote);
   await pullLatest(paths.hubDir).catch(() => undefined);
 
@@ -37,18 +40,19 @@ export async function diffCommand(opts: DiffOptions): Promise<void> {
   }
 
   const subs = buildSubs({
-    claudeDir: cfg.claudeDir,
+    appDir,
+    appToken: profile.pathToken,
     home: os.homedir(),
     extra: cfg.substitutions,
   });
 
-  const localScoped = (await pathExists(cfg.claudeDir))
-    ? await listScopedFiles(cfg.claudeDir, cfg.scope)
+  const localScoped = (await pathExists(appDir))
+    ? await listScopedFiles(appDir, cfg.scope)
     : [];
 
   const summary = await diffTrees({
     snapshotRoot,
-    localRoot: cfg.claudeDir,
+    localRoot: appDir,
     localScoped,
     resolveContent: (text) => resolveTokens(text, subs),
   });

@@ -23,5 +23,5 @@ If the user passed `--fix`, the CLI runs `bootstrap` automatically after diagnos
 
 ### Fallbacks
 
-- If `~/.claude-handoff/config.json` is missing, tell the user to run `/handoff-init` first.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first.
 - If hooks.json doesn't exist (`No external dependencies referenced...` output), confirm there's nothing to check and stop.

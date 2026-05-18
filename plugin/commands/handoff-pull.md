@@ -1,5 +1,5 @@
 ---
-description: Apply another device's Claude Code setup to this machine
+description: Apply another device's agent setup to this machine
 argument-hint: "(no arguments — the slash command drives device picking and confirmation interactively)"
 allowed-tools: [Bash, Read, AskUserQuestion]
 ---
@@ -11,8 +11,12 @@ If the user already supplied `$ARGUMENTS`, just run `handoff pull $ARGUMENTS` an
 ### 1. Read the hub manifest and current device
 
 ```bash
-cat ~/.claude-handoff/hub/manifest.json
-cat ~/.claude-handoff/config.json
+STATE_DIR="${AGENT_HANDOFF_HOME:-${CLAUDE_HANDOFF_HOME:-$HOME/.agent-handoff}}"
+if [ ! -f "$STATE_DIR/config.json" ] && [ -f "$HOME/.claude-handoff/config.json" ]; then
+  STATE_DIR="$HOME/.claude-handoff"
+fi
+cat "$STATE_DIR/hub/manifest.json"
+cat "$STATE_DIR/config.json"
 ```
 
 Parse `devices` from the manifest — each entry has `latest.pushedAt`, `latest.fileCount`, and `latest.host`. Sort entries by `pushedAt` descending. Read `device` from the config — that's the current machine's name.
@@ -41,7 +45,7 @@ Run:
 handoff pull --from <device> --dry-run
 ```
 
-The CLI prints `Applying N files from "<device>" → <claude-dir>` followed by every file path prefixed with `[dry]`, then `(dry-run — no files written)`. Surface that list so the user knows exactly what will change. If the file list is empty, stop and tell the user there's nothing to apply.
+The CLI prints `Applying N files from "<device>" → <app-dir>` followed by every file path prefixed with `[dry]`, then `(dry-run — no files written)`. Surface that list so the user knows exactly what will change. If the file list is empty, stop and tell the user there's nothing to apply.
 
 For richer diff context (modifications vs creations vs local-only files) add a follow-up:
 
@@ -55,7 +59,7 @@ Run it only if the file list is large (>20) or the user asked for a deeper previ
 
 Use `AskUserQuestion`:
 
-- Question: `"Apply <N> files from <device> into <claude-dir>?"` — substitute real values.
+- Question: `"Apply <N> files from <device> into <app-dir>?"` — substitute real values.
 - Options:
   - `Apply now (Recommended)` — proceed to step 5.
   - `Show full diff first` — run `handoff diff --from <device> --patch`, surface it, then re-ask this same question.
@@ -67,7 +71,7 @@ Use `AskUserQuestion`:
 handoff pull --from <device>
 ```
 
-Do **not** pass `--confirm` — the user already confirmed in step 4, and `--confirm` would re-trigger the CLI's TTY prompt. Surface the CLI's output (`✓ pulled "<device>" into <claude-dir>`).
+Do **not** pass `--confirm` — the user already confirmed in step 4, and `--confirm` would re-trigger the CLI's TTY prompt. Surface the CLI's output (`✓ pulled "<device>" into <app-dir>`).
 
 ### 6. Report back
 
@@ -81,7 +85,7 @@ If the user picked **Cancel** in step 4, make it explicit that nothing was appli
 
 ### Fallbacks
 
-- If `~/.claude-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
-- If `~/.claude-handoff/hub/manifest.json` is missing, the hub clone is incomplete — suggest `/handoff-init` (which will re-clone) or a manual `git -C ~/.claude-handoff/hub pull`.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
+- If `~/.agent-handoff/hub/manifest.json` is missing, the hub clone is incomplete — suggest `/handoff-init` (which will re-clone) or a manual `git -C ~/.agent-handoff/hub pull`.
 - If the CLI errors with `No snapshot directory at ...`, the chosen device's snapshot was never committed — surface the error and offer to re-run `/handoff-pull` against a different device.
 - Never call `handoff pull` *without* `--from <device>` when more than one device exists. The CLI's interactive picker hangs through the Bash tool.
