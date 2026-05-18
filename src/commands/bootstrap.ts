@@ -23,8 +23,8 @@ export async function bootstrapCommand(opts: BootstrapOptions): Promise<void> {
   await ensureClone(paths.hubDir, cfg.hubRemote).catch(() => undefined);
   await pullLatest(paths.hubDir).catch(() => undefined);
 
-  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device, getProfile(cfg.profile).snapshotDirName);
-  const manifest = await readManifest(deviceDir);
+  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const manifest = await readManifest(deviceDir, getProfile(cfg.profile).name);
 
   if (Object.keys(manifest.dependencies).length === 0) {
     console.log(pc.dim("No declared dependencies in this device's manifest."));

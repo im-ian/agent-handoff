@@ -79,10 +79,8 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
 
   const deviceRoot = path.join(paths.hubDir, 'devices', cfg.device);
   const snapshotRoot = path.join(deviceRoot, 'snapshot', profile.snapshotDirName);
-  const profileMetaDir = path.join(deviceRoot, profile.snapshotDirName);
   await fs.rm(snapshotRoot, { recursive: true, force: true });
   await fs.mkdir(snapshotRoot, { recursive: true });
-  await fs.mkdir(profileMetaDir, { recursive: true });
 
   let byteCount = 0;
   for (const rel of allowedFiles) {
@@ -106,10 +104,22 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
     fileCount: allowedFiles.length,
     byteCount,
   };
-  await fs.writeFile(
-    path.join(profileMetaDir, 'version.json'),
-    JSON.stringify(version, null, 2) + '\n',
-  );
+  // Single consolidated version.json per device, keyed by profile so
+  // both Claude and Codex snapshot metadata share one file (mirrors
+  // manifest.json's per-profile keying).
+  const versionFile = path.join(deviceRoot, 'version.json');
+  let existingVersions: Record<string, DeviceVersion> = {};
+  try {
+    const raw = await fs.readFile(versionFile, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      existingVersions = parsed as Record<string, DeviceVersion>;
+    }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+  }
+  existingVersions[profile.name] = version;
+  await fs.writeFile(versionFile, JSON.stringify(existingVersions, null, 2) + '\n');
 
   await upsertDevice(paths.hubDir, cfg.device, profile.name, version);
 

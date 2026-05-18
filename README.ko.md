@@ -234,16 +234,12 @@ v1은 `hooks/hooks.json`에서만 검출; `scripts/**/*.sh` 파싱은 v1.1로.
 │   ├── snapshot/
 │   │   ├── claude/              # Claude profile 토큰화 파일
 │   │   └── codex/               # Codex profile 토큰화 파일
-│   ├── claude/
-│   │   ├── version.json         # 타임스탬프, 파일 개수, 바이트 수, host
-│   │   └── dependencies.json    # 선언된 외부 의존성 (Claude profile)
-│   └── codex/
-│       ├── version.json
-│       └── dependencies.json
-└── manifest.json                # devices[name][profile] → DeviceVersion 레지스트리
+│   ├── version.json             # { claude: { pushedAt, host, ... }, codex: { ... } }
+│   └── dependencies.json        # { claude: { dependencies: {...} }, codex: { ... } }
+└── manifest.json                # { version: 2, devices: { <name>: { claude: ..., codex: ... } } }
 ```
 
-한 device 가 `claude` 와 `codex` 두 profile snapshot 을 나란히 보관 — 동일 device 이름, profile 별 sub-tree 분리. `pull` 은 `<source>/snapshot/<로컬-profile>/` 만 읽어서 cross-profile pull 이 구조적으로 차단됩니다.
+한 device 가 `claude` 와 `codex` 두 profile snapshot 을 나란히 보관. 메타데이터 파일 (`version.json`, `dependencies.json`) 은 device 루트에 하나씩, 내부적으로 profile 별 키로 분리 — manifest 와 같은 모양. `pull` 은 `<source>/snapshot/<로컬-profile>/` 만 읽어서 cross-profile pull 이 구조적으로 차단됩니다.
 
 Hub의 git commit 하나 = 한 디바이스의 profile push 한 번. **N개 디바이스 × M개 버전**이 git 히스토리로 자연스럽게 표현됩니다. 디바이스 간 merge는 없음 — `/agent-handoff:pull --from X`는 현재 profile에 해당하는 X의 스냅샷을 원자적으로 적용.
 

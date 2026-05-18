@@ -1,37 +1,60 @@
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import type { DependencyEntry, DependencyManifest } from '../types.js';
+import type { DependencyEntry, DependencyManifest, ProfileName } from '../types.js';
 
 const MANIFEST_FILE = 'dependencies.json';
+
+/**
+ * Shape of `devices/<name>/dependencies.json` on disk.
+ *
+ * Keyed by profile so both Claude and Codex deps can live in one file,
+ * mirroring the per-profile structure of `manifest.json`.
+ */
+type OnDiskShape = Partial<Record<ProfileName, DependencyManifest>>;
 
 function manifestPath(deviceDir: string): string {
   return path.join(deviceDir, MANIFEST_FILE);
 }
 
-export async function readManifest(deviceDir: string): Promise<DependencyManifest> {
+function emptyProfileEntry(): DependencyManifest {
+  return { version: 1, dependencies: {} };
+}
+
+async function readWholeFile(deviceDir: string): Promise<OnDiskShape> {
   try {
     const raw = await fs.readFile(manifestPath(deviceDir), 'utf8');
-    const parsed = JSON.parse(raw) as DependencyManifest;
-    if (!parsed.dependencies) parsed.dependencies = {};
-    if (!parsed.version) parsed.version = 1;
-    return parsed;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      return { version: 1, dependencies: {} };
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as OnDiskShape;
     }
+    return {};
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return {};
     throw err;
   }
 }
 
+export async function readManifest(
+  deviceDir: string,
+  profile: ProfileName,
+): Promise<DependencyManifest> {
+  const all = await readWholeFile(deviceDir);
+  const entry = all[profile];
+  if (!entry) return emptyProfileEntry();
+  if (!entry.dependencies) entry.dependencies = {};
+  if (!entry.version) entry.version = 1;
+  return entry;
+}
+
 export async function writeManifest(
   deviceDir: string,
+  profile: ProfileName,
   manifest: DependencyManifest,
 ): Promise<void> {
+  const all = await readWholeFile(deviceDir);
+  all[profile] = manifest;
   await fs.mkdir(deviceDir, { recursive: true });
-  await fs.writeFile(
-    manifestPath(deviceDir),
-    JSON.stringify(manifest, null, 2) + '\n',
-  );
+  await fs.writeFile(manifestPath(deviceDir), JSON.stringify(all, null, 2) + '\n');
 }
 
 /**

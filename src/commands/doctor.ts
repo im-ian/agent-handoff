@@ -34,8 +34,8 @@ export async function doctorCommand(opts: DoctorOptions): Promise<void> {
     return;
   }
 
-  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device, profile.snapshotDirName);
-  const manifest = await readManifest(deviceDir);
+  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const manifest = await readManifest(deviceDir, profile.name);
 
   const present: string[] = [];
   const missing: MissingDep[] = [];

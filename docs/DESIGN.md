@@ -30,12 +30,8 @@ A single user may run Claude Code or Codex on 3+ machines. A simple "one canonic
 │   │   │       ├── AGENTS.md
 │   │   │       ├── config.toml
 │   │   │       └── skills/
-│   │   ├── claude/
-│   │   │   ├── version.json         # last Claude push metadata
-│   │   │   └── dependencies.json    # declared deps (Claude profile)
-│   │   └── codex/
-│   │       ├── version.json
-│   │       └── dependencies.json
+│   │   ├── version.json             # { claude: { pushedAt, host, ... }, codex: { ... } }
+│   │   └── dependencies.json        # { claude: { dependencies: {...} }, codex: { ... } }
 │   ├── desktop-home/
 │   └── work-pc/
 └── manifest.json

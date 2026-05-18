@@ -4,7 +4,7 @@ import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest, commitAndPush } from '../core/git.js';
 import { readManifest, writeManifest } from '../core/dep-manifest.js';
 import { getProfile } from '../core/profiles.js';
-import type { DependencyManifest } from '../types.js';
+import type { DependencyManifest, ProfileName } from '../types.js';
 
 export interface DepsAddOptions {
   darwin?: string;
@@ -12,21 +12,19 @@ export interface DepsAddOptions {
   description?: string;
 }
 
-function profileDir(hubDir: string, device: string, profile: string): string {
-  return path.join(hubDir, 'devices', device, profile);
-}
-
 async function loadForEdit(): Promise<{
   device: string;
   deviceDir: string;
+  profile: ProfileName;
   manifest: DependencyManifest;
 }> {
   const cfg = await requireConfig();
   await ensureClone(paths.hubDir, cfg.hubRemote);
   await pullLatest(paths.hubDir).catch(() => undefined);
-  const deviceDir = profileDir(paths.hubDir, cfg.device, getProfile(cfg.profile).snapshotDirName);
-  const manifest = await readManifest(deviceDir);
-  return { device: cfg.device, deviceDir, manifest };
+  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const profile = getProfile(cfg.profile).name;
+  const manifest = await readManifest(deviceDir, profile);
+  return { device: cfg.device, deviceDir, profile, manifest };
 }
 
 export async function depsAddCommand(name: string, opts: DepsAddOptions): Promise<void> {
@@ -39,7 +37,7 @@ export async function depsAddCommand(name: string, opts: DepsAddOptions): Promis
     process.exit(1);
   }
 
-  const { deviceDir, manifest } = await loadForEdit();
+  const { deviceDir, profile, manifest } = await loadForEdit();
   const existing = manifest.dependencies[name];
   manifest.dependencies[name] = {
     description: opts.description ?? existing?.description,
@@ -49,7 +47,7 @@ export async function depsAddCommand(name: string, opts: DepsAddOptions): Promis
     },
   };
 
-  await writeManifest(deviceDir, manifest);
+  await writeManifest(deviceDir, profile, manifest);
   console.log(
     pc.green(`✓ ${existing ? 'updated' : 'added'} ${pc.cyan(name)} in dependencies.json`),
   );
@@ -66,8 +64,8 @@ export async function depsListCommand(): Promise<void> {
   const cfg = await requireConfig();
   await ensureClone(paths.hubDir, cfg.hubRemote).catch(() => undefined);
   await pullLatest(paths.hubDir).catch(() => undefined);
-  const deviceDir = profileDir(paths.hubDir, cfg.device, getProfile(cfg.profile).snapshotDirName);
-  const manifest = await readManifest(deviceDir);
+  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const manifest = await readManifest(deviceDir, getProfile(cfg.profile).name);
 
   const entries = Object.entries(manifest.dependencies);
   if (entries.length === 0) {
@@ -94,13 +92,13 @@ export async function depsRemoveCommand(name: string): Promise<void> {
     console.error(pc.red('Dependency name required.'));
     process.exit(1);
   }
-  const { deviceDir, manifest } = await loadForEdit();
+  const { deviceDir, profile, manifest } = await loadForEdit();
   if (!manifest.dependencies[name]) {
     console.log(pc.yellow(`No dependency named "${name}" — nothing to remove.`));
     return;
   }
   delete manifest.dependencies[name];
-  await writeManifest(deviceDir, manifest);
+  await writeManifest(deviceDir, profile, manifest);
   console.log(pc.green(`✓ removed ${pc.cyan(name)} from dependencies.json`));
 
   const sha = await commitAndPush(paths.hubDir, `deps: remove ${name}`);
