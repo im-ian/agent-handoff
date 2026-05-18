@@ -2,13 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { buildSubs, tokenize, resolve, TOKENS } from './tokenize.js';
 
 const macIdentity = {
-  claudeDir: '/Users/jthefloor/.claude',
+  appDir: '/Users/jthefloor/.claude',
   home: '/Users/jthefloor',
   extra: [],
 };
 
 const workIdentity = {
-  claudeDir: '/Users/ian.lee/.claude',
+  appDir: '/Users/ian.lee/.claude',
   home: '/Users/ian.lee',
   extra: [],
 };
@@ -21,7 +21,7 @@ const codexIdentity = {
 };
 
 describe('buildSubs', () => {
-  it('orders longest "from" first (claudeDir before home)', () => {
+  it('orders longest "from" first (appDir before home)', () => {
     const subs = buildSubs(macIdentity);
     expect(subs[0]?.from).toBe('/Users/jthefloor/.claude');
     expect(subs[1]?.from).toBe('/Users/jthefloor');

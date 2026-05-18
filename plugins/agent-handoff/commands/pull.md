@@ -11,10 +11,7 @@ Preview before writing. Always pass `--from <device>` to avoid CLI device-pickin
 
 1. Read the current config and hub manifest.
    ```bash
-   STATE_DIR="${AGENT_HANDOFF_HOME:-${CLAUDE_HANDOFF_HOME:-$HOME/.agent-handoff}}"
-   if [ ! -f "$STATE_DIR/config.json" ] && [ -f "$HOME/.claude-handoff/config.json" ]; then
-     STATE_DIR="$HOME/.claude-handoff"
-   fi
+   STATE_DIR="${AGENT_HANDOFF_HOME:-$HOME/.agent-handoff}"
    cat "$STATE_DIR/config.json"
    cat "$STATE_DIR/hub/manifest.json"
    ```

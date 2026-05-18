@@ -134,8 +134,8 @@ rm -rf ~/.agent-handoff               # local config + hub clone (remote untouch
 
 Conservative **allowlist** so unknown files never leak by accident. The default depends on the selected profile.
 
-- **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, top-level `*.md`
-- **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, top-level `*.md`
+- **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, top-level `*.md`
+- **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, top-level `*.md`
 - **Hard-deny (always excluded):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
 - **Custom:** edit `scope.include` / `scope.excludeExtra` in `~/.agent-handoff/config.json`. `excludeExtra` stacks on the hard-deny list.
 
@@ -212,14 +212,13 @@ One git commit on the hub = one push from one device. **N devices × M versions*
   "profile": "claude",
   "hubRemote": "https://github.com/<you>/<hub>.git",
   "appDir": "/Users/<you>/.claude",
-  "claudeDir": "/Users/<you>/.claude",
   "scope": { "include": ["agents/**", "..."], "optIn": [], "excludeExtra": [] },
   "secretPolicy": { "allow": [] },
   "substitutions": []
 }
 ```
 
-`AGENT_HANDOFF_HOME` env var overrides the config/hub location (default `~/.agent-handoff/`) — useful for safe trial runs (`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments. Existing `CLAUDE_HANDOFF_HOME` and `~/.claude-handoff` installs remain supported.
+`AGENT_HANDOFF_HOME` env var overrides the config/hub location (default `~/.agent-handoff/`) — useful for safe trial runs (`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments.
 
 ---
 

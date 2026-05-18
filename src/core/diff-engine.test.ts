@@ -7,7 +7,7 @@ import { diffTrees } from './diff-engine.js';
 const identity = (t: string) => t;
 
 async function mkTemp(): Promise<string> {
-  return fs.mkdtemp(path.join(os.tmpdir(), 'claude-handoff-diff-'));
+  return fs.mkdtemp(path.join(os.tmpdir(), 'agent-handoff-diff-'));
 }
 
 async function write(root: string, rel: string, content: string | Buffer): Promise<void> {

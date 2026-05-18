@@ -1,29 +1,30 @@
 {
-  "name": "claude-handoff",
+  "name": "agent-handoff",
   "owner": {
     "name": "im-ian"
   },
   "metadata": {
-    "description": "Sync your Claude Code setup across devices — device-aware, path-tokenized, secret-scanning hub for ~/.claude/"
+    "description": "Sync your Claude Code and Codex setup across devices — device-aware, path-tokenized, secret-scanning hub for agent config."
   },
   "plugins": [
     {
-      "name": "claude-handoff",
+      "name": "agent-handoff",
       "source": "./plugin",
-      "description": "Slash-command wrapper around the claude-handoff CLI — /handoff-init, /handoff-push, /handoff-pull, /handoff-diff, /handoff-status, /handoff-doctor, /handoff-bootstrap, /handoff-deps.",
+      "description": "Slash-command wrapper around the agent-handoff CLI — /handoff-init, /handoff-push, /handoff-pull, /handoff-diff, /handoff-status, /handoff-doctor, /handoff-bootstrap, /handoff-deps.",
       "version": "1.0.0",
       "author": {
         "name": "im-ian"
       },
-      "homepage": "https://github.com/im-ian/claude-handoff",
-      "repository": "https://github.com/im-ian/claude-handoff",
+      "homepage": "https://github.com/im-ian/agent-handoff",
+      "repository": "https://github.com/im-ian/agent-handoff",
       "license": "MIT",
       "keywords": [
         "sync",
         "handoff",
         "dotfiles",
         "cross-device",
-        "claude-code"
+        "claude-code",
+        "codex"
       ],
       "category": "workflow",
       "strict": false

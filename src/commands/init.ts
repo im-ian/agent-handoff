@@ -118,7 +118,6 @@ export async function initCommand(opts: InitOptions): Promise<void> {
     device,
     hubRemote,
     appDir,
-    claudeDir: profileName === 'claude' ? appDir : undefined,
     substitutions: keepEditable ? existing!.substitutions : [],
     scope: keepEditable ? existing!.scope : structuredClone(profile.defaultScope),
     secretPolicy: keepEditable ? existing!.secretPolicy : { allow: [] },

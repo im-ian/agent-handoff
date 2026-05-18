@@ -134,8 +134,8 @@ rm -rf ~/.agent-handoff               # 로컬 config + hub clone (원격 저장
 
 알 수 없는 파일이 실수로 새지 않도록 **allowlist** 방식. 기본값은 profile별로 다릅니다.
 
-- **Claude 기본 포함:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, 최상위 `*.md`
-- **Codex 기본 포함:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, 최상위 `*.md`
+- **Claude 기본 포함:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, 최상위 `*.md`
+- **Codex 기본 포함:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, 최상위 `*.md`
 - **항상 제외 (hard-deny):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
 - **커스텀:** `~/.agent-handoff/config.json`의 `scope.include` / `scope.excludeExtra` 편집. `excludeExtra`는 hard-deny 위에 누적됩니다.
 
@@ -212,14 +212,13 @@ Hub의 git commit 하나 = 한 디바이스의 push 한 번. **N개 디바이스
   "profile": "claude",
   "hubRemote": "https://github.com/<you>/<hub>.git",
   "appDir": "/Users/<you>/.claude",
-  "claudeDir": "/Users/<you>/.claude",
   "scope": { "include": ["agents/**", "..."], "optIn": [], "excludeExtra": [] },
   "secretPolicy": { "allow": [] },
   "substitutions": []
 }
 ```
 
-`AGENT_HANDOFF_HOME` 환경변수로 config/hub 위치 변경 가능 (기본 `~/.agent-handoff/`) — 안전한 시범 실행(`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`)이나 공유 환경에서의 사용자별 격리에 유용. 기존 `CLAUDE_HANDOFF_HOME`과 `~/.claude-handoff` 설치도 계속 지원합니다.
+`AGENT_HANDOFF_HOME` 환경변수로 config/hub 위치 변경 가능 (기본 `~/.agent-handoff/`) — 안전한 시범 실행(`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`)이나 공유 환경에서의 사용자별 격리에 유용.
 
 ---
 

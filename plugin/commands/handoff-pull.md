@@ -11,10 +11,7 @@ If the user already supplied `$ARGUMENTS`, just run `handoff pull $ARGUMENTS` an
 ### 1. Read the hub manifest and current device
 
 ```bash
-STATE_DIR="${AGENT_HANDOFF_HOME:-${CLAUDE_HANDOFF_HOME:-$HOME/.agent-handoff}}"
-if [ ! -f "$STATE_DIR/config.json" ] && [ -f "$HOME/.claude-handoff/config.json" ]; then
-  STATE_DIR="$HOME/.claude-handoff"
-fi
+STATE_DIR="${AGENT_HANDOFF_HOME:-$HOME/.agent-handoff}"
 cat "$STATE_DIR/hub/manifest.json"
 cat "$STATE_DIR/config.json"
 ```

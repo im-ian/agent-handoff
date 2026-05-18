@@ -12,7 +12,6 @@ export const TOKENS = {
 export interface DeviceIdentity {
   appDir?: string;
   appToken?: string;
-  claudeDir?: string;
   home: string;
   extra: Substitution[];
 }
@@ -23,10 +22,9 @@ export interface DeviceIdentity {
 // with unrelated words in comments, commit messages, or natural-language content.
 // Opt in via config.substitutions if your hooks truly need them.
 export function buildSubs(id: DeviceIdentity): Substitution[] {
-  const appDir = id.appDir ?? id.claudeDir;
   const appToken = id.appToken ?? TOKENS.CLAUDE;
   const base: Substitution[] = [
-    ...(appDir ? [{ from: appDir, to: appToken }] : []),
+    ...(id.appDir ? [{ from: id.appDir, to: appToken }] : []),
     { from: id.home, to: TOKENS.HOME },
   ];
   return [...base, ...id.extra]
