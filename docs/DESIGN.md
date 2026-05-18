@@ -21,24 +21,25 @@ A single user may run Claude Code or Codex on 3+ machines. A simple "one canonic
 <hub-repo>/
 ├── devices/
 │   ├── macbook-pro/
-│   │   ├── snapshot/           # tokenized scoped files by agent profile
-│   │   │   ├── .claude/
+│   │   ├── snapshot/
+│   │   │   ├── claude/              # tokenized Claude profile files
 │   │   │   │   ├── agents/
 │   │   │   │   ├── hooks/
-│   │   │   │   ├── skills/
-│   │   │   │   └── ...
-│   │   │   └── .codex/
+│   │   │   │   └── skills/
+│   │   │   └── codex/               # tokenized Codex profile files
 │   │   │       ├── AGENTS.md
 │   │   │       ├── config.toml
-│   │   │       └── ...
-│   │   └── version.json        # metadata for this device's latest push
+│   │   │       └── skills/
+│   │   ├── claude/
+│   │   │   ├── version.json         # last Claude push metadata
+│   │   │   └── dependencies.json    # declared deps (Claude profile)
+│   │   └── codex/
+│   │       ├── version.json
+│   │       └── dependencies.json
 │   ├── desktop-home/
-│   │   └── ...
 │   └── work-pc/
-│       └── ...
-├── manifest.json               # registry of all known devices
-└── .handoff/
-    └── README.md               # hub-level notes
+└── manifest.json
+    # { version: 2, devices: { macbook-pro: { claude: {...}, codex: {...} }, ... } }
 ```
 
 ### Versioning — N × M

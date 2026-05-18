@@ -11,7 +11,7 @@
       "name": "agent-handoff",
       "source": "./plugin",
       "description": "Slash-command wrapper around the agent-handoff CLI — /agent-handoff:init, /agent-handoff:push, /agent-handoff:pull, /agent-handoff:diff, /agent-handoff:status, /agent-handoff:doctor, /agent-handoff:bootstrap, /agent-handoff:deps.",
-      "version": "1.2.0",
+      "version": "2.0.0",
       "author": {
         "name": "im-ian"
       },

@@ -78,11 +78,11 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
   });
 
   const deviceRoot = path.join(paths.hubDir, 'devices', cfg.device);
-  const snapshotParent = path.join(deviceRoot, 'snapshot');
-  const snapshotRoot = path.join(snapshotParent, profile.snapshotDirName);
-  await removeLegacySnapshotEntries(snapshotParent);
+  const snapshotRoot = path.join(deviceRoot, 'snapshot', profile.snapshotDirName);
+  const profileMetaDir = path.join(deviceRoot, profile.snapshotDirName);
   await fs.rm(snapshotRoot, { recursive: true, force: true });
   await fs.mkdir(snapshotRoot, { recursive: true });
+  await fs.mkdir(profileMetaDir, { recursive: true });
 
   let byteCount = 0;
   for (const rel of allowedFiles) {
@@ -101,19 +101,17 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
   }
 
   const version: DeviceVersion = {
-    device: cfg.device,
-    profile: profile.name,
     pushedAt: new Date().toISOString(),
     host: os.hostname(),
     fileCount: allowedFiles.length,
     byteCount,
   };
   await fs.writeFile(
-    path.join(deviceRoot, 'version.json'),
+    path.join(profileMetaDir, 'version.json'),
     JSON.stringify(version, null, 2) + '\n',
   );
 
-  await upsertDevice(paths.hubDir, version);
+  await upsertDevice(paths.hubDir, cfg.device, profile.name, version);
 
   const message =
     opts.message ?? `push: ${cfg.device} — ${allowedFiles.length} files`;
@@ -123,23 +121,6 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
     return;
   }
   console.log(pc.green(`✓ pushed ${allowedFiles.length} files as ${cfg.device}@${sha.slice(0, 7)}`));
-}
-
-async function removeLegacySnapshotEntries(snapshotParent: string): Promise<void> {
-  let entries: string[];
-  try {
-    entries = await fs.readdir(snapshotParent);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return;
-    throw err;
-  }
-
-  const profileDirs = new Set(['.claude', '.codex']);
-  await Promise.all(
-    entries
-      .filter((entry) => !profileDirs.has(entry))
-      .map((entry) => fs.rm(path.join(snapshotParent, entry), { recursive: true, force: true })),
-  );
 }
 
 // ---------- dry-run ----------
@@ -208,7 +189,7 @@ async function pushDryRun(cfg: DeviceConfig, opts: PushOptions): Promise<void> {
   console.log(pc.bold('Projected push:'));
   console.log(`  Files:      ${files.length} (${textFiles} text, ${binaryFiles} binary)`);
   console.log(`  Bytes:      ${formatBytes(totalBytes)} after tokenization`);
-  console.log(`  Target:     devices/${cfg.device}/snapshot/${profile.snapshotDirName}/ on hub`);
+  console.log(`  Target:     devices/${cfg.device}/snapshot/${profile.snapshotDirName}/ on hub (version at devices/${cfg.device}/${profile.snapshotDirName}/version.json)`);
   const msg = opts.message ?? `push: ${cfg.device} — ${files.length} files`;
   console.log(`  Commit msg: ${msg}`);
 }

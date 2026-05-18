@@ -44,8 +44,8 @@ describe('agent profiles', () => {
 
     expect(claude.defaultDir()).toBe(path.join(os.homedir(), '.claude'));
     expect(codex.defaultDir()).toBe(path.join(os.homedir(), '.codex'));
-    expect(claude.snapshotDirName).toBe('.claude');
-    expect(codex.snapshotDirName).toBe('.codex');
+    expect(claude.snapshotDirName).toBe('claude');
+    expect(codex.snapshotDirName).toBe('codex');
     expect(codex.defaultScope.include).toContain('AGENTS.md');
     expect(codex.defaultScope.include).toContain('skills/**');
     expect(codex.defaultScope.excludeExtra).toEqual([]);

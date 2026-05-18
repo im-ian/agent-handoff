@@ -3,12 +3,17 @@ import pc from 'picocolors';
 import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest, commitAndPush } from '../core/git.js';
 import { readManifest, writeManifest } from '../core/dep-manifest.js';
+import { getProfile } from '../core/profiles.js';
 import type { DependencyManifest } from '../types.js';
 
 export interface DepsAddOptions {
   darwin?: string;
   linux?: string;
   description?: string;
+}
+
+function profileDir(hubDir: string, device: string, profile: string): string {
+  return path.join(hubDir, 'devices', device, profile);
 }
 
 async function loadForEdit(): Promise<{
@@ -19,7 +24,7 @@ async function loadForEdit(): Promise<{
   const cfg = await requireConfig();
   await ensureClone(paths.hubDir, cfg.hubRemote);
   await pullLatest(paths.hubDir).catch(() => undefined);
-  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const deviceDir = profileDir(paths.hubDir, cfg.device, getProfile(cfg.profile).snapshotDirName);
   const manifest = await readManifest(deviceDir);
   return { device: cfg.device, deviceDir, manifest };
 }
@@ -61,7 +66,7 @@ export async function depsListCommand(): Promise<void> {
   const cfg = await requireConfig();
   await ensureClone(paths.hubDir, cfg.hubRemote).catch(() => undefined);
   await pullLatest(paths.hubDir).catch(() => undefined);
-  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const deviceDir = profileDir(paths.hubDir, cfg.device, getProfile(cfg.profile).snapshotDirName);
   const manifest = await readManifest(deviceDir);
 
   const entries = Object.entries(manifest.dependencies);

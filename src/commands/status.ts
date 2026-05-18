@@ -40,11 +40,22 @@ export async function statusCommand(_opts: unknown): Promise<void> {
     }
     for (const [name, info] of entries) {
       const marker = name === cfg.device ? pc.green('●') : pc.dim('○');
-      const time = new Date(info.latest.pushedAt).toLocaleString();
       const label = name.padEnd(20);
-      const profileInfo = info.latest.profile ? `${info.latest.profile}, ` : '';
-      const fileInfo = `${profileInfo}${info.latest.fileCount} files`;
-      console.log(`  ${marker} ${pc.cyan(label)} ${pc.dim(time)}  ${pc.dim(fileInfo)}`);
+      const profileLines = Object.entries(info)
+        .filter(([, v]) => v)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+      if (profileLines.length === 0) {
+        console.log(`  ${marker} ${pc.cyan(label)} ${pc.dim('(no snapshots)')}`);
+        continue;
+      }
+      profileLines.forEach(([profileName, version], idx) => {
+        const prefix = idx === 0
+          ? `  ${marker} ${pc.cyan(label)}`
+          : `    ${' '.repeat(label.length)}`;
+        const time = new Date(version!.pushedAt).toLocaleString();
+        const fileInfo = `${version!.fileCount} files`;
+        console.log(`${prefix} ${pc.yellow(`[${profileName}]`)} ${pc.dim(time)}  ${pc.dim(fileInfo)}`);
+      });
     }
   } catch (err) {
     console.log(pc.red('Failed to read hub: ' + (err as Error).message));
