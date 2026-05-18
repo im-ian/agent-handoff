@@ -9,6 +9,7 @@ export const DEFAULT_SCOPE: ScopeConfig = {
     'skills/**',
     'rules/**',
     'mcp-configs/**',
+    'memory/**',
     '*.md',
   ],
   optIn: [],

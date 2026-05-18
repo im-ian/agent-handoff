@@ -12,6 +12,7 @@ export const CODEX_SCOPE: ScopeConfig = {
     'rules/**',
     'skills/**',
     'commands/**',
+    'memories/**',
     '*.md',
   ],
   optIn: [],

@@ -134,8 +134,8 @@ rm -rf ~/.agent-handoff               # local config + hub clone (remote untouch
 
 Conservative **allowlist** so unknown files never leak by accident. The default depends on the selected profile.
 
-- **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, top-level `*.md`
-- **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, top-level `*.md`
+- **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, top-level `*.md`
+- **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, top-level `*.md`
 - **Hard-deny (always excluded):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
 - **Custom:** edit `scope.include` / `scope.excludeExtra` in `~/.agent-handoff/config.json`. `excludeExtra` stacks on the hard-deny list.
 

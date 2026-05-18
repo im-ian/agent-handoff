@@ -134,8 +134,8 @@ rm -rf ~/.agent-handoff               # 로컬 config + hub clone (원격 저장
 
 알 수 없는 파일이 실수로 새지 않도록 **allowlist** 방식. 기본값은 profile별로 다릅니다.
 
-- **Claude 기본 포함:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, 최상위 `*.md`
-- **Codex 기본 포함:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, 최상위 `*.md`
+- **Claude 기본 포함:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, 최상위 `*.md`
+- **Codex 기본 포함:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, 최상위 `*.md`
 - **항상 제외 (hard-deny):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
 - **커스텀:** `~/.agent-handoff/config.json`의 `scope.include` / `scope.excludeExtra` 편집. `excludeExtra`는 hard-deny 위에 누적됩니다.
 
