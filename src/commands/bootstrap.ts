@@ -5,6 +5,7 @@ import { execa } from 'execa';
 import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest } from '../core/git.js';
 import { readManifest, getInstallForPlatform, isInstalled } from '../core/dep-manifest.js';
+import { getProfile } from '../core/profiles.js';
 
 export interface BootstrapOptions {
   yes?: boolean;
@@ -22,7 +23,7 @@ export async function bootstrapCommand(opts: BootstrapOptions): Promise<void> {
   await ensureClone(paths.hubDir, cfg.hubRemote).catch(() => undefined);
   await pullLatest(paths.hubDir).catch(() => undefined);
 
-  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device);
+  const deviceDir = path.join(paths.hubDir, 'devices', cfg.device, getProfile(cfg.profile).snapshotDirName);
   const manifest = await readManifest(deviceDir);
 
   if (Object.keys(manifest.dependencies).length === 0) {

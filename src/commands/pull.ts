@@ -36,12 +36,19 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
   const source = await resolveSource(opts, cfg, manifest);
   if (source === null) return;
 
-  if (!manifest.devices[source]) {
+  const entry = manifest.devices[source];
+  if (!entry) {
     console.error(pc.red(`Unknown device "${source}".`));
     const known = Object.keys(manifest.devices);
     console.error(
       pc.dim(`Known devices: ${known.length ? known.join(', ') : '(none — push from at least one device first)'}`),
     );
+    process.exit(1);
+  }
+  if (!entry[profile.name]) {
+    const profilesPushed = Object.keys(entry).join(', ') || '(none)';
+    console.error(pc.red(`Device "${source}" has no ${profile.name} snapshot.`));
+    console.error(pc.dim(`Profiles pushed by ${source}: ${profilesPushed}`));
     process.exit(1);
   }
 
@@ -169,15 +176,24 @@ async function resolveSource(
     return null;
   }
 
-  const sortedEntries = entries.sort((a, b) =>
-    b[1].latest.pushedAt.localeCompare(a[1].latest.pushedAt),
-  );
+  const profileName = getProfile(cfg.profile).name;
+  // Order by most recent push of THIS profile; fall back to any push.
+  const lastPush = (info: typeof entries[0][1]): string => {
+    const candidate = info[profileName]?.pushedAt;
+    if (candidate) return candidate;
+    return Object.values(info)
+      .map((v) => v?.pushedAt ?? '')
+      .sort()
+      .pop() ?? '';
+  };
+  const sortedEntries = entries.sort((a, b) => lastPush(b[1]).localeCompare(lastPush(a[1])));
   const choices = sortedEntries.map(([name, info]) => {
     const suffix = name === cfg.device ? pc.dim(' (this device)') : '';
-    const when = new Date(info.latest.pushedAt).toLocaleString();
-    const profile = info.latest.profile ? ` ${info.latest.profile},` : '';
-    const meta = pc.dim(`—${profile} ${info.latest.fileCount} files, ${when}`);
-    return { title: `${name}${suffix}  ${meta}`, value: name };
+    const matching = info[profileName];
+    const meta = matching
+      ? pc.dim(`— ${profileName}, ${matching.fileCount} files, ${new Date(matching.pushedAt).toLocaleString()}`)
+      : pc.red(`— no ${profileName} snapshot (has: ${Object.keys(info).join(', ') || 'none'})`);
+    return { title: `${name}${suffix}  ${meta}`, value: name, disabled: !matching };
   });
   const currentIdx = choices.findIndex((c) => c.value === cfg.device);
 

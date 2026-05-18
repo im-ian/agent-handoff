@@ -28,17 +28,17 @@ export interface DeviceConfig {
 }
 
 export interface DeviceVersion {
-  device: string;
-  profile: ProfileName;
   pushedAt: string;
   host: string;
   fileCount: number;
   byteCount: number;
 }
 
+export type DeviceManifestEntry = Partial<Record<ProfileName, DeviceVersion>>;
+
 export interface HubManifest {
-  version: 1;
-  devices: Record<string, { latest: DeviceVersion }>;
+  version: 2;
+  devices: Record<string, DeviceManifestEntry>;
   updatedAt: string;
 }
 
