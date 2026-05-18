@@ -68,7 +68,7 @@ Every slash command drives prompts through `AskUserQuestion` (device pickers, se
 
 ## Installation
 
-### 1. Plugin (inside Claude Code)
+### 1. Claude Code plugin
 
 ```
 /plugin marketplace add im-ian/agent-handoff
@@ -77,6 +77,19 @@ Every slash command drives prompts through `AskUserQuestion` (device pickers, se
 ```
 
 Updates ride through `/plugin update`.
+
+### Codex plugin
+
+This repo also ships a Codex plugin at `plugins/agent-handoff/` with slash commands for the Codex profile. The repo-local marketplace entry lives at `.agents/plugins/marketplace.json`.
+
+After adding/installing the local marketplace in Codex, the commands drive the same CLI with `--profile codex` where needed:
+
+```
+/init      # runs handoff init --profile codex ...
+/push      # dry-run + secret policy + push
+/pull      # source selection + preview + apply
+/status    # current profile, app dir, hub, devices
+```
 
 ### 2. `handoff` CLI backend
 

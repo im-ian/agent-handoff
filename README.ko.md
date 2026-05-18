@@ -68,7 +68,7 @@ handoff push
 
 ## 설치
 
-### 1. 플러그인 (Claude Code 안에서)
+### 1. Claude Code 플러그인
 
 ```
 /plugin marketplace add im-ian/agent-handoff
@@ -77,6 +77,19 @@ handoff push
 ```
 
 업데이트는 `/plugin update`로 따라옵니다.
+
+### Codex 플러그인
+
+이 레포는 `plugins/agent-handoff/`에 Codex plugin도 포함합니다. Codex profile용 slash command를 제공하며, repo-local marketplace entry는 `.agents/plugins/marketplace.json`에 있습니다.
+
+Codex에서 로컬 marketplace를 추가/설치한 뒤에는 같은 CLI를 필요한 곳에서 `--profile codex`로 실행합니다:
+
+```
+/init      # handoff init --profile codex ...
+/push      # dry-run + secret 정책 선택 + push
+/pull      # source 선택 + preview + apply
+/status    # 현재 profile, app dir, hub, devices
+```
 
 ### 2. `handoff` CLI 백엔드
 
