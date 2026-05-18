@@ -36,6 +36,14 @@ const HARD_DENY = [
   'ecc/**',
   '.agents/**',
   '.omc/**',
+  // Plugin install dirs — pulling a snapshotted plugin would restore a stale
+  // copy of agent-handoff (or any other plugin), defeating the marketplace
+  // install path. Always install plugins via /plugin, never via handoff sync.
+  'plugins/**',
+  '**/agent-handoff/**',
+  // Legacy install.sh symlinks for this plugin live in commands/handoff-*.md.
+  // Same reason — don't sync them.
+  'commands/handoff-*.md',
   '**/*.log',
   '**/*.jsonl',
   '**/.credentials.json',

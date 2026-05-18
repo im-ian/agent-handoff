@@ -136,7 +136,7 @@ rm -rf ~/.agent-handoff               # 로컬 config + hub clone (원격 저장
 
 - **Claude 기본 포함:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, 최상위 `*.md`
 - **Codex 기본 포함:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, 최상위 `*.md`
-- **항상 제외 (hard-deny):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
+- **항상 제외 (hard-deny):** `projects/**`, `sessions/**`, `cache/**`, `plugins/**`, `**/agent-handoff/**`, `commands/handoff-*.md`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`. `plugins/**` / `agent-handoff` / `handoff-*` 항목은 agent-handoff 플러그인 자체를 hub 밖으로 빼서, pull 시 옛 플러그인이 복원되는 사고를 막습니다 — 플러그인은 항상 marketplace 에서 설치하세요.
 - **커스텀:** `~/.agent-handoff/config.json`의 `scope.include` / `scope.excludeExtra` 편집. `excludeExtra`는 hard-deny 위에 누적됩니다.
 
 ---
@@ -199,6 +199,8 @@ v1은 `hooks/hooks.json`에서만 검출; `scripts/**/*.sh` 파싱은 v1.1로.
 ```
 
 Hub의 git commit 하나 = 한 디바이스의 push 한 번. **N개 디바이스 × M개 버전**이 git 히스토리로 자연스럽게 표현됩니다. 디바이스 간 merge는 없음 — `/agent-handoff:pull --from X`는 항상 X의 전체 스냅샷을 원자적으로 적용.
+
+`/agent-handoff:init --create-hub` 로 신규 hub 를 만들면 자동으로 `README.md` 를 시드합니다. 레이아웃 설명, 복구 순서(marketplace 로 플러그인 설치 → CLI 설치 → `handoff init` → `handoff pull`), 일상 명령 표가 포함되어 hub 저장소 자체가 복구 문서 역할을 합니다.
 
 ---
 

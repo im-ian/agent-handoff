@@ -57,4 +57,38 @@ describe('listScopedFiles — memory backup coverage', () => {
     expect(files).not.toContain('memory/leaked.credentials.json');
     expect(files).not.toContain('memory/.env.local');
   });
+
+  it('excludes the plugins/ tree so cached plugins never round-trip', async () => {
+    await touch(root, 'plugins/cache/agent-handoff/agent-handoff/1.1.0/README.md');
+    await touch(root, 'plugins/installed_plugins.json');
+    await touch(root, 'CLAUDE.md');
+
+    const files = await listScopedFiles(root, DEFAULT_SCOPE);
+
+    expect(files).toContain('CLAUDE.md');
+    expect(files.some((f) => f.startsWith('plugins/'))).toBe(false);
+  });
+
+  it('excludes any nested agent-handoff/ directory (e.g. install.sh targets)', async () => {
+    await touch(root, 'agents/agent-handoff/foo.md');
+    await touch(root, 'skills/agent-handoff/bar.md');
+    await touch(root, 'agents/keep.md');
+
+    const files = await listScopedFiles(root, DEFAULT_SCOPE);
+
+    expect(files).toContain('agents/keep.md');
+    expect(files.some((f) => f.includes('agent-handoff/'))).toBe(false);
+  });
+
+  it('excludes legacy commands/handoff-*.md symlinks from install.sh', async () => {
+    await touch(root, 'commands/handoff-init.md');
+    await touch(root, 'commands/handoff-push.md');
+    await touch(root, 'commands/my-other-command.md');
+
+    const files = await listScopedFiles(root, DEFAULT_SCOPE);
+
+    expect(files).toContain('commands/my-other-command.md');
+    expect(files).not.toContain('commands/handoff-init.md');
+    expect(files).not.toContain('commands/handoff-push.md');
+  });
 });
