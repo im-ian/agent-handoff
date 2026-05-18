@@ -15,4 +15,4 @@ Summarize:
 - each known device with its last-push timestamp and file count
 - which device is the current one (marked with `●`)
 
-If the output says "Not initialized", suggest `/handoff-init` to the user.
+If the output says "Not initialized", suggest `/agent-handoff:init` to the user.

@@ -66,12 +66,12 @@ On success the CLI ends with `✓ pushed N files as <device>@<sha>`. Summarize i
 - File count pushed.
 - How many files were skipped by secret review (if any), with their paths.
 - Short SHA + the hub URL.
-- If this is the first push from this machine, suggest `/handoff-pull --from <this-device>` on another machine as the next step.
+- If this is the first push from this machine, suggest `/agent-handoff:pull --from <this-device>` on another machine as the next step.
 
-If the CLI exited non-zero, surface its stderr and offer to re-run `/handoff-push`.
+If the CLI exited non-zero, surface its stderr and offer to re-run `/agent-handoff:push`.
 
 ### Fallbacks
 
-- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/agent-handoff:init` first and stop.
 - If Claude Code's safety hook denies `handoff push --allow-secrets` even after the user explicitly chose it (the user authorization is captured in the conversation), surface the hook's message and tell the user they can either (a) re-run `handoff push --allow-secrets` directly in their terminal, or (b) add a Bash permission rule to their Claude settings to allow it.
 - Never call `handoff push` *without* `--skip-on-secrets` or `--allow-secrets` when findings exist. Doing so triggers the CLI's per-file `prompts`, which hang through the Bash tool.

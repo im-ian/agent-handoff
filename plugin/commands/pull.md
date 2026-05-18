@@ -20,7 +20,7 @@ Parse `devices` from the manifest — each entry has `latest.pushedAt`, `latest.
 
 Decide the next step based on device count:
 
-- **0 devices** → tell the user no machine has pushed yet, suggest `/handoff-push` on another device first, and stop.
+- **0 devices** → tell the user no machine has pushed yet, suggest `/agent-handoff:push` on another device first, and stop.
 - **1 device** → auto-pick it (warn the user if it's the same as the current device — pulling your own snapshot only makes sense when restoring).
 - **N devices** → continue to step 2.
 
@@ -82,7 +82,7 @@ If the user picked **Cancel** in step 4, make it explicit that nothing was appli
 
 ### Fallbacks
 
-- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first and stop.
-- If `~/.agent-handoff/hub/manifest.json` is missing, the hub clone is incomplete — suggest `/handoff-init` (which will re-clone) or a manual `git -C ~/.agent-handoff/hub pull`.
-- If the CLI errors with `No snapshot directory at ...`, the chosen device's snapshot was never committed — surface the error and offer to re-run `/handoff-pull` against a different device.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/agent-handoff:init` first and stop.
+- If `~/.agent-handoff/hub/manifest.json` is missing, the hub clone is incomplete — suggest `/agent-handoff:init` (which will re-clone) or a manual `git -C ~/.agent-handoff/hub pull`.
+- If the CLI errors with `No snapshot directory at ...`, the chosen device's snapshot was never committed — surface the error and offer to re-run `/agent-handoff:pull` against a different device.
 - Never call `handoff pull` *without* `--from <device>` when more than one device exists. The CLI's interactive picker hangs through the Bash tool.

@@ -45,8 +45,8 @@ npm install && npm run build && npm link
 Then back in Claude Code:
 
 ```
-/handoff-init       # asks you a few questions, creates a PRIVATE GitHub hub repo
-/handoff-push       # snapshot ~/.claude/ to the hub
+/agent-handoff:init       # asks you a few questions, creates a PRIVATE GitHub hub repo
+/agent-handoff:push       # snapshot ~/.claude/ to the hub
 ```
 
 For Codex from the terminal:
@@ -56,10 +56,10 @@ handoff init --profile codex --hub git@github.com:you/agent-handoff-hub.git --de
 handoff push
 ```
 
-On another machine — after the same install + `/handoff-init`:
+On another machine — after the same install + `/agent-handoff:init`:
 
 ```
-/handoff-pull       # pick the source device, preview diff, apply
+/agent-handoff:pull       # pick the source device, preview diff, apply
 ```
 
 Every slash command drives prompts through `AskUserQuestion` (device pickers, secret-scan policy, install confirmations) — no interactive CLI hangs, no flags to memorize.
@@ -100,7 +100,7 @@ git clone https://github.com/im-ian/agent-handoff.git && cd agent-handoff
 npm install && npm run build && npm link
 ```
 
-Verify with `/handoff-status` inside Claude Code — if it runs without "command not found", you're set. In terminal, `handoff --version` prints `1.0.0`.
+Verify with `/agent-handoff:status` inside Claude Code — if it runs without "command not found", you're set. In terminal, `handoff --version` prints `1.0.0`.
 
 ### Uninstall
 
@@ -119,14 +119,14 @@ rm -rf ~/.agent-handoff               # local config + hub clone (remote untouch
 
 | Command | Purpose |
 |---|---|
-| `/handoff-init` | Register this device, link or create a hub repo. Interactively picks hub setup and device name. |
-| `/handoff-push` | Snapshot the configured agent directory to the hub. Runs secret scan via `--dry-run` first; `AskUserQuestion` drives skip/allow/abort on findings. |
-| `/handoff-pull` | Apply another device's snapshot. Shows the device list, previews the diff, asks before overwriting. |
-| `/handoff-diff` | Preview what `pull` would change, without applying. |
-| `/handoff-status` | Show this device's registration, hub URL, and all known devices with last-push timestamps. |
-| `/handoff-doctor` | Diagnose missing external deps referenced by `hooks.json` — shows where each missing binary is used and how to install it. |
-| `/handoff-bootstrap` | Install declared deps that are missing on this machine. Always shows the plan and asks before executing. |
-| `/handoff-deps` | Manage the per-device `dependencies.json` (`add <name> --darwin "..." --linux "..."` / `list` / `remove`). |
+| `/agent-handoff:init` | Register this device, link or create a hub repo. Interactively picks hub setup and device name. |
+| `/agent-handoff:push` | Snapshot the configured agent directory to the hub. Runs secret scan via `--dry-run` first; `AskUserQuestion` drives skip/allow/abort on findings. |
+| `/agent-handoff:pull` | Apply another device's snapshot. Shows the device list, previews the diff, asks before overwriting. |
+| `/agent-handoff:diff` | Preview what `pull` would change, without applying. |
+| `/agent-handoff:status` | Show this device's registration, hub URL, and all known devices with last-push timestamps. |
+| `/agent-handoff:doctor` | Diagnose missing external deps referenced by `hooks.json` — shows where each missing binary is used and how to install it. |
+| `/agent-handoff:bootstrap` | Install declared deps that are missing on this machine. Always shows the plan and asks before executing. |
+| `/agent-handoff:deps` | Manage the per-device `dependencies.json` (`add <name> --darwin "..." --linux "..."` / `list` / `remove`). |
 
 ---
 
@@ -163,7 +163,7 @@ So `"command": "node \"/Users/alice/.claude/hooks/x.js\""` becomes `"node \"${HA
 
 Every scoped text file (≤ 2 MB) is scanned for: Anthropic/OpenAI/GitHub/Google/AWS/Slack tokens, private key headers, JWTs, generic `password=` / `api_key=` literals.
 
-- **From `/handoff-push`.** A `--dry-run` preflight surfaces findings, then `AskUserQuestion` offers skip flagged / upload everything / abort. Public or unknown-visibility hubs get an extra warning.
+- **From `/agent-handoff:push`.** A `--dry-run` preflight surfaces findings, then `AskUserQuestion` offers skip flagged / upload everything / abort. Public or unknown-visibility hubs get an extra warning.
 - **From the terminal, interactive.** Per-file prompt: *skip* / *upload anyway* / *abort*. Non-private hubs require a typed `yes` confirmation.
 - **False positives** (Django `SECRET_KEY` examples, test fixtures, password-pattern docs) → add file paths to `secretPolicy.allow` in config. Manual edits only — prevents click-fatigue from silently growing the list.
 
@@ -174,14 +174,14 @@ Every scoped text file (≤ 2 MB) is scanned for: Anthropic/OpenAI/GitHub/Google
 Hooks invoke external CLIs (`gh`, `jq`, `clawd`, `rtk`, …). After a pull onto a fresh machine, those binaries may not be installed → hooks silently fail with `command not found`. Three slash commands address this:
 
 ```
-/handoff-deps add gh --darwin "brew install gh" --linux "apt install gh"
-/handoff-doctor            # confirm gh is declared; see what else is missing
-/handoff-bootstrap         # install missing declared deps (shows plan, asks first)
+/agent-handoff:deps add gh --darwin "brew install gh" --linux "apt install gh"
+/agent-handoff:doctor            # confirm gh is declared; see what else is missing
+/agent-handoff:bootstrap         # install missing declared deps (shows plan, asks first)
 ```
 
-- **`/handoff-doctor`** — read-only scan of `hooks/hooks.json`. Shows missing binaries with file:line context and a suggested fix from the manifest.
-- **`/handoff-deps add/list/remove`** — edits the per-device manifest at `<hub>/devices/<name>/dependencies.json`. `add` and `remove` auto-commit and push.
-- **`/handoff-bootstrap`** — installs declared deps that aren't on PATH. Always prints the install plan first, always requires confirmation. Pull *never* auto-installs anything.
+- **`/agent-handoff:doctor`** — read-only scan of `hooks/hooks.json`. Shows missing binaries with file:line context and a suggested fix from the manifest.
+- **`/agent-handoff:deps add/list/remove`** — edits the per-device manifest at `<hub>/devices/<name>/dependencies.json`. `add` and `remove` auto-commit and push.
+- **`/agent-handoff:bootstrap`** — installs declared deps that aren't on PATH. Always prints the install plan first, always requires confirmation. Pull *never* auto-installs anything.
 
 v1 detects from `hooks/hooks.json` only; `scripts/**/*.sh` parsing comes in v1.1.
 
@@ -198,13 +198,13 @@ v1 detects from `hooks/hooks.json` only; `scripts/**/*.sh` parsing comes in v1.1
 └── manifest.json            # registry of all devices
 ```
 
-One git commit on the hub = one push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/handoff-pull --from X` always applies X's complete snapshot atomically.
+One git commit on the hub = one push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/agent-handoff:pull --from X` always applies X's complete snapshot atomically.
 
 ---
 
 ## Configuration
 
-`~/.agent-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `/handoff-init` writes a sensible default.
+`~/.agent-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `/agent-handoff:init` writes a sensible default.
 
 ```json
 {

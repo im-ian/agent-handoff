@@ -188,9 +188,9 @@ Future: `handoff pull --at <sha>` (historical version), `handoff log --device <n
 
 ## Claude Code plugin wrapper
 
-A sibling `plugin/` directory exposes `handoff` as slash commands (`/handoff-push`, `/handoff-pull`, `/handoff-diff`, `/handoff-status`, `/handoff-init`). Installation is a symlink step (`plugin/install.sh`) — the command files live in the repo and stay in sync via `git pull`.
+A sibling `plugin/` directory exposes `handoff` as slash commands (`/agent-handoff:push`, `/agent-handoff:pull`, `/agent-handoff:diff`, `/agent-handoff:status`, `/agent-handoff:init`). Installation is a symlink step (`plugin/install.sh`) — the command files live in the repo and stay in sync via `git pull`.
 
-Slash commands pass through arguments via `$ARGUMENTS`, so `/handoff-pull --from work-pc --confirm` routes to the CLI verbatim. The wrapper intentionally does NOT try to handle interactive prompts (secret review, `--confirm` y/N, `init`'s hub URL prompt) — the Bash tool is not a TTY, and pretending otherwise breaks silently. Instead, each command's body tells the agent how to fall back (pass non-interactive flags or run directly in the terminal).
+Slash commands pass through arguments via `$ARGUMENTS`, so `/agent-handoff:pull --from work-pc --confirm` routes to the CLI verbatim. The wrapper intentionally does NOT try to handle interactive prompts (secret review, `--confirm` y/N, `init`'s hub URL prompt) — the Bash tool is not a TTY, and pretending otherwise breaks silently. Instead, each command's body tells the agent how to fall back (pass non-interactive flags or run directly in the terminal).
 
 ## Non-goals (MVP)
 
