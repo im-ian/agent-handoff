@@ -1,14 +1,18 @@
 import type { Substitution } from '../types.js';
 
 export const TOKENS = {
+  APP: '${HANDOFF_APP}',
   CLAUDE: '${HANDOFF_CLAUDE}',
+  CODEX: '${HANDOFF_CODEX}',
   HOME: '${HANDOFF_HOME}',
   USER: '${HANDOFF_USER}',
   HOSTNAME: '${HANDOFF_HOSTNAME}',
 } as const;
 
 export interface DeviceIdentity {
-  claudeDir: string;
+  appDir?: string;
+  appToken?: string;
+  claudeDir?: string;
   home: string;
   extra: Substitution[];
 }
@@ -19,8 +23,10 @@ export interface DeviceIdentity {
 // with unrelated words in comments, commit messages, or natural-language content.
 // Opt in via config.substitutions if your hooks truly need them.
 export function buildSubs(id: DeviceIdentity): Substitution[] {
+  const appDir = id.appDir ?? id.claudeDir;
+  const appToken = id.appToken ?? TOKENS.CLAUDE;
   const base: Substitution[] = [
-    { from: id.claudeDir, to: TOKENS.CLAUDE },
+    ...(appDir ? [{ from: appDir, to: appToken }] : []),
     { from: id.home, to: TOKENS.HOME },
   ];
   return [...base, ...id.extra]

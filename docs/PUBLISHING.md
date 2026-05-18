@@ -1,6 +1,6 @@
 # Publishing & marketplace submission
 
-This document is the owner's runbook for shipping `claude-handoff` to end users.
+This document is the owner's runbook for shipping `agent-handoff` to end users.
 
 ## Prerequisites
 
@@ -38,7 +38,7 @@ npm publish --access public
 After a successful publish:
 
 ```bash
-npm view @im-ian/claude-handoff    # verify metadata
+npm view @im-ian/agent-handoff    # verify metadata
 git push --follow-tags              # push version commit + tag
 ```
 
@@ -47,13 +47,13 @@ git push --follow-tags              # push version commit + tag
 From a fresh machine (or a scratch shell):
 
 ```bash
-npm install -g @im-ian/claude-handoff
+npm install -g @im-ian/agent-handoff
 handoff --version
 ```
 
 ## 2. Update the README install instructions
 
-Once published, the README already points at `npm install -g @im-ian/claude-handoff` as the future path. No edit needed unless the name or scope changes.
+Once published, the README already points at `npm install -g @im-ian/agent-handoff` as the future path. No edit needed unless the name or scope changes.
 
 ## 3. Submit to the official Claude Code marketplace
 
@@ -65,18 +65,18 @@ Use this JSON fragment (targeted at the marketplace.json `plugins` array). The `
 
 ```json
 {
-  "name": "claude-handoff",
-  "description": "Sync your Claude Code setup across devices — device-aware path tokenization, secret scanning, and a shared hub repo with N:M versioning.",
+  "name": "agent-handoff",
+  "description": "Sync your agent setup across devices — device-aware path tokenization, secret scanning, and a shared hub repo with N:M versioning.",
   "category": "productivity",
   "author": {
     "name": "im-ian"
   },
   "source": {
     "source": "url",
-    "url": "https://github.com/im-ian/claude-handoff.git",
+    "url": "https://github.com/im-ian/agent-handoff.git",
     "sha": "<fill-in-the-release-commit-sha>"
   },
-  "homepage": "https://github.com/im-ian/claude-handoff"
+  "homepage": "https://github.com/im-ian/agent-handoff"
 }
 ```
 
@@ -94,18 +94,18 @@ gh repo fork anthropics/claude-plugins-official --clone
 cd claude-plugins-official
 
 # create a branch
-git checkout -b add-claude-handoff
+git checkout -b add-agent-handoff
 
 # edit .claude-plugin/marketplace.json — insert your entry in the `plugins` array,
 # keeping the array sorted alphabetically by `name` to match the existing convention.
 # then stage + commit:
 git add .claude-plugin/marketplace.json
-git commit -m "feat: add claude-handoff plugin"
+git commit -m "feat: add agent-handoff plugin"
 
-git push -u origin add-claude-handoff
+git push -u origin add-agent-handoff
 gh pr create --repo anthropics/claude-plugins-official \
-  --title "Add claude-handoff" \
-  --body "Adds claude-handoff — a cross-device sync tool for \`~/.claude/\` setups. Tokenizes device-specific paths so hooks survive username changes between machines, scans for secrets before upload, and uses a shared hub repo for N:M versioning. Repo: https://github.com/im-ian/claude-handoff"
+  --title "Add agent-handoff" \
+  --body "Adds agent-handoff — a cross-device sync tool for \`~/.claude/\` setups. Tokenizes device-specific paths so hooks survive username changes between machines, scans for secrets before upload, and uses a shared hub repo for N:M versioning. Repo: https://github.com/im-ian/agent-handoff"
 ```
 
 Anthropic reviews third-party entries. Expect a review turnaround of a few days; they may request changes (description tweaks, homepage verification, etc.).
@@ -130,9 +130,9 @@ To issue a new release through the official marketplace:
 1. Get the latest commit SHA: `git rev-parse HEAD`
 2. Open a new PR against `anthropics/claude-plugins-official` updating the `sha` field in your existing entry.
 
-### Own marketplace (`im-ian/claude-handoff`)
+### Own marketplace (`im-ian/agent-handoff`)
 
-No submission required — users pulling from `/plugin marketplace add im-ian/claude-handoff` track `main` automatically. `/plugin update` fetches whatever is at `HEAD`.
+No submission required — users pulling from `/plugin marketplace add im-ian/agent-handoff` track `main` automatically. `/plugin update` fetches whatever is at `HEAD`.
 
 ## Troubleshooting: stale marketplace cache
 
@@ -141,7 +141,7 @@ Observed on Claude Code in April 2026: after `/plugin marketplace add <repo>` ha
 Reproduce & verify:
 
 ```bash
-git -C ~/.claude/plugins/marketplaces/claude-handoff log --oneline -3
+git -C ~/.claude/plugins/marketplaces/agent-handoff log --oneline -3
 # should show the latest commit you published; if it doesn't, the cache is stale
 ```
 
@@ -149,18 +149,18 @@ Three ways to unstick it, cheapest first:
 
 1. **Git pull the marketplace clone** (non-destructive, preserves installed plugins):
    ```bash
-   git -C ~/.claude/plugins/marketplaces/claude-handoff pull --ff-only
+   git -C ~/.claude/plugins/marketplaces/agent-handoff pull --ff-only
    ```
 2. **Remove and re-add the marketplace** (drops any install state too):
    ```
-   /plugin marketplace remove claude-handoff
-   /plugin marketplace add im-ian/claude-handoff
+   /plugin marketplace remove agent-handoff
+   /plugin marketplace add im-ian/agent-handoff
    ```
 3. **Delete the cached clone manually** before re-adding:
    ```bash
-   rm -rf ~/.claude/plugins/marketplaces/claude-handoff
+   rm -rf ~/.claude/plugins/marketplaces/agent-handoff
    ```
-   Then `/plugin marketplace add im-ian/claude-handoff`.
+   Then `/plugin marketplace add im-ian/agent-handoff`.
 
 End users installing through the marketplace won't hit this on first install (fresh clone), but will hit it if they try to get a newer version by running `add` a second time. Mention this in release notes so people know to run `/plugin update` or the `git pull` trick.
 
@@ -170,8 +170,8 @@ End users installing through the marketplace won't hit this on first install (fr
 
 npm publishes are append-only; you cannot "delete" a published version once it's been installed by anyone. Options:
 
-- `npm deprecate @im-ian/claude-handoff@<bad-version> "reason"` — shows a warning on install but doesn't remove the version.
-- `npm unpublish @im-ian/claude-handoff@<bad-version>` — only allowed within 72 hours of publish, only if nothing else depends on it. **Avoid** unless the release contained secrets.
+- `npm deprecate @im-ian/agent-handoff@<bad-version> "reason"` — shows a warning on install but doesn't remove the version.
+- `npm unpublish @im-ian/agent-handoff@<bad-version>` — only allowed within 72 hours of publish, only if nothing else depends on it. **Avoid** unless the release contained secrets.
 - Publish a patch release that reverts the broken change — preferred.
 
 ### Marketplace
@@ -190,5 +190,5 @@ Copy this into a GitHub release or tag annotation:
 - [ ] Published to npm (npm publish)
 - [ ] Tag pushed (git push --follow-tags)
 - [ ] Official marketplace PR opened/updated with new sha
-- [ ] Smoke test: npm install -g @im-ian/claude-handoff && handoff --version on a clean machine
+- [ ] Smoke test: npm install -g @im-ian/agent-handoff && handoff --version on a clean machine
 ```

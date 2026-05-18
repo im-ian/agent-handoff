@@ -1,3 +1,5 @@
+export type ProfileName = 'claude' | 'codex';
+
 export interface Substitution {
   from: string;
   to: string;
@@ -16,9 +18,13 @@ export interface SecretPolicy {
 }
 
 export interface DeviceConfig {
+  profile: ProfileName;
   device: string;
   hubRemote: string;
-  claudeDir: string;
+  appDir: string;
+  // Legacy config key. Kept so existing ~/.claude-handoff/config.json files
+  // continue to read and write cleanly during the agent-handoff transition.
+  claudeDir?: string;
   substitutions: Substitution[];
   scope: ScopeConfig;
   secretPolicy: SecretPolicy;

@@ -6,22 +6,22 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
-  <img src="docs/assets/hero-light.svg" alt="claude-handoff" width="100%">
+  <img src="docs/assets/hero-light.svg" alt="agent-handoff" width="100%">
 </picture>
 
 <p align="center">
-  Hand off your Claude Code setup between devices — sync <code>~/.claude/</code> across machines, driven by slash commands.
+  Hand off your agent setup between devices — sync <code>~/.claude/</code> or <code>~/.codex/</code> across machines.
 </p>
 
 ---
 
 ## Why
 
-If you use Claude Code on more than one machine — say a home Mac and a work Mac — moving hooks, skills, and agents between them is surprisingly painful. Copying `hooks.json` across doesn't work: absolute paths like `/Users/your-home-name/…` don't exist on the other machine, so every hook breaks. Skills, agents, and rules all end up getting moved by hand.
+If you use Claude Code or Codex on more than one machine — say a home Mac and a work Mac — moving hooks, skills, agents, rules, and local config between them is surprisingly painful. Copying files across often breaks because absolute paths like `/Users/your-home-name/…` don't exist on the other machine.
 
-`claude-handoff` automates the whole thing. Per-machine paths are rewritten to portable tokens so configs resolve correctly wherever you pull them, a scanner catches secrets (API keys, tokens) before anything leaves your device, and a shared hub repository keeps every machine's configs and push history in one place.
+`agent-handoff` automates the whole thing. Per-machine paths are rewritten to portable tokens so configs resolve correctly wherever you pull them, a scanner catches secrets (API keys, tokens) before anything leaves your device, and a shared hub repository keeps every machine's configs and push history in one place.
 
-It all runs inside Claude Code through slash commands — no terminal juggling, no flags to memorize.
+Claude Code users can run it through slash commands. Codex users can use the same `handoff` CLI directly with `--profile codex`.
 
 ---
 
@@ -30,15 +30,15 @@ It all runs inside Claude Code through slash commands — no terminal juggling, 
 Inside Claude Code:
 
 ```
-/plugin marketplace add im-ian/claude-handoff
-/plugin install claude-handoff@claude-handoff
+/plugin marketplace add im-ian/agent-handoff
+/plugin install agent-handoff@agent-handoff
 /reload-plugins
 ```
 
 One-time terminal step (npm publish pending — see [Installation](#installation)):
 
 ```bash
-git clone https://github.com/im-ian/claude-handoff.git && cd claude-handoff
+git clone https://github.com/im-ian/agent-handoff.git && cd agent-handoff
 npm install && npm run build && npm link
 ```
 
@@ -47,6 +47,13 @@ Then back in Claude Code:
 ```
 /handoff-init       # asks you a few questions, creates a PRIVATE GitHub hub repo
 /handoff-push       # snapshot ~/.claude/ to the hub
+```
+
+For Codex from the terminal:
+
+```bash
+handoff init --profile codex --hub git@github.com:you/agent-handoff-hub.git --device my-mac
+handoff push
 ```
 
 On another machine — after the same install + `/handoff-init`:
@@ -64,8 +71,8 @@ Every slash command drives prompts through `AskUserQuestion` (device pickers, se
 ### 1. Plugin (inside Claude Code)
 
 ```
-/plugin marketplace add im-ian/claude-handoff
-/plugin install claude-handoff@claude-handoff
+/plugin marketplace add im-ian/agent-handoff
+/plugin install agent-handoff@agent-handoff
 /reload-plugins
 ```
 
@@ -76,7 +83,7 @@ Updates ride through `/plugin update`.
 The plugin is a thin wrapper — every slash command shells out to a `handoff` binary on your PATH. Until npm publish lands, install from source:
 
 ```bash
-git clone https://github.com/im-ian/claude-handoff.git && cd claude-handoff
+git clone https://github.com/im-ian/agent-handoff.git && cd agent-handoff
 npm install && npm run build && npm link
 ```
 
@@ -85,12 +92,12 @@ Verify with `/handoff-status` inside Claude Code — if it runs without "command
 ### Uninstall
 
 ```
-/plugin uninstall claude-handoff@claude-handoff
+/plugin uninstall agent-handoff@agent-handoff
 ```
 
 ```bash
-npm unlink -g @im-ian/claude-handoff   # CLI
-rm -rf ~/.claude-handoff               # local config + hub clone (remote untouched)
+npm unlink -g @im-ian/agent-handoff   # CLI
+rm -rf ~/.agent-handoff               # local config + hub clone (remote untouched)
 ```
 
 ---
@@ -100,7 +107,7 @@ rm -rf ~/.claude-handoff               # local config + hub clone (remote untouc
 | Command | Purpose |
 |---|---|
 | `/handoff-init` | Register this device, link or create a hub repo. Interactively picks hub setup and device name. |
-| `/handoff-push` | Snapshot `~/.claude/` to the hub. Runs secret scan via `--dry-run` first; `AskUserQuestion` drives skip/allow/abort on findings. |
+| `/handoff-push` | Snapshot the configured agent directory to the hub. Runs secret scan via `--dry-run` first; `AskUserQuestion` drives skip/allow/abort on findings. |
 | `/handoff-pull` | Apply another device's snapshot. Shows the device list, previews the diff, asks before overwriting. |
 | `/handoff-diff` | Preview what `pull` would change, without applying. |
 | `/handoff-status` | Show this device's registration, hub URL, and all known devices with last-push timestamps. |
@@ -112,11 +119,12 @@ rm -rf ~/.claude-handoff               # local config + hub clone (remote untouc
 
 ## What gets synced
 
-Conservative **allowlist** so unknown files never leak by accident.
+Conservative **allowlist** so unknown files never leak by accident. The default depends on the selected profile.
 
-- **Default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `scripts/**`, `mcp-configs/**`, `settings.json`, top-level `*.md`
+- **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, top-level `*.md`
+- **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, top-level `*.md`
 - **Hard-deny (always excluded):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
-- **Custom:** edit `scope.include` / `scope.excludeExtra` in `~/.claude-handoff/config.json`. `excludeExtra` stacks on the hard-deny list.
+- **Custom:** edit `scope.include` / `scope.excludeExtra` in `~/.agent-handoff/config.json`. `excludeExtra` stacks on the hard-deny list.
 
 ---
 
@@ -128,7 +136,8 @@ On push, two literals get rewritten to placeholders. On pull, they resolve back 
 
 | Token | Replaces |
 |---|---|
-| `${HANDOFF_CLAUDE}` | `$HOME/.claude` (absolute path) |
+| `${HANDOFF_CLAUDE}` | `$HOME/.claude` for the Claude profile |
+| `${HANDOFF_CODEX}` | `$HOME/.codex` for the Codex profile |
 | `${HANDOFF_HOME}` | `$HOME` |
 
 So `"command": "node \"/Users/alice/.claude/hooks/x.js\""` becomes `"node \"${HANDOFF_CLAUDE}/hooks/x.js\""` in the hub, then on bob's machine resolves to `"node \"/Users/bob/.claude/hooks/x.js\""` — automatically correct. Longest pattern wins so path nesting stays right.
@@ -182,12 +191,14 @@ One git commit on the hub = one push from one device. **N devices × M versions*
 
 ## Configuration
 
-`~/.claude-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `/handoff-init` writes a sensible default.
+`~/.agent-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `/handoff-init` writes a sensible default.
 
 ```json
 {
   "device": "my-mac",
+  "profile": "claude",
   "hubRemote": "https://github.com/<you>/<hub>.git",
+  "appDir": "/Users/<you>/.claude",
   "claudeDir": "/Users/<you>/.claude",
   "scope": { "include": ["agents/**", "..."], "optIn": [], "excludeExtra": [] },
   "secretPolicy": { "allow": [] },
@@ -195,7 +206,7 @@ One git commit on the hub = one push from one device. **N devices × M versions*
 }
 ```
 
-`CLAUDE_HANDOFF_HOME` env var overrides the config/hub location (default `~/.claude-handoff/`) — useful for safe trial runs (`CLAUDE_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments.
+`AGENT_HANDOFF_HOME` env var overrides the config/hub location (default `~/.agent-handoff/`) — useful for safe trial runs (`AGENT_HANDOFF_HOME=/tmp/trial handoff init …`) and per-user isolation in shared environments. Existing `CLAUDE_HANDOFF_HOME` and `~/.claude-handoff` installs remain supported.
 
 ---
 
@@ -209,7 +220,7 @@ Every slash command is a thin wrapper around a matching `handoff <subcommand>` i
 
 - **`fatal: could not read Password for 'https://…@github.com'`** — set a local credential helper for the hub clone:
   ```bash
-  git -C ~/.claude-handoff/hub config --local credential.helper '!gh auth git-credential'
+  git -C ~/.agent-handoff/hub config --local credential.helper '!gh auth git-credential'
   ```
   Multi-account: `gh auth switch --user <login>` first.
 
@@ -229,9 +240,9 @@ Every slash command is a thin wrapper around a matching `handoff <subcommand>` i
 
 ## Related work
 
-[`claude-teleport`](https://github.com/seilk/claude-teleport) by [@seilk](https://github.com/seilk) covers the same space — "sync Claude Code setup across machines via a private GitHub repo" — and `claude-handoff` was directly inspired by it. The two projects ended up with different architectural choices worth understanding before picking one:
+[`claude-teleport`](https://github.com/seilk/claude-teleport) by [@seilk](https://github.com/seilk) covers the same space — "sync agent setup across machines via a private GitHub repo" — and `agent-handoff` was directly inspired by it. The two projects ended up with different architectural choices worth understanding before picking one:
 
-| | claude-teleport | claude-handoff |
+| | claude-teleport | agent-handoff |
 |---|---|---|
 | Storage model | Branch-per-device, auto-merged into `main` | Directory-per-device (`devices/<name>/`) on `main`, no merging |
 | Cross-device paths | Synced verbatim | Tokenized — `${HANDOFF_CLAUDE}` / `${HANDOFF_HOME}` so a hook written on `/Users/alice/…` runs correctly on `/Users/bob/…` |
@@ -241,7 +252,7 @@ Every slash command is a thin wrapper around a matching `handoff <subcommand>` i
 
 If you want a branch-merged single-source-of-truth with public sharing, pick teleport. If you want per-device isolation, path tokenization, and external-dep tracking, pick this one.
 
-**Why a separate project, not a PR?** The storage model (directory vs. branch), path tokenization, and dep-tracking surface touch every command — they aren't a patch, they're a different set of tradeoffs in the same problem space. seilk's design is coherent for its use case; `claude-handoff` explores different ones.
+**Why a separate project, not a PR?** The storage model (directory vs. branch), path tokenization, and dep-tracking surface touch every command — they aren't a patch, they're a different set of tradeoffs in the same problem space. seilk's design is coherent for its use case; `agent-handoff` explores different ones.
 
 Dotfile managers (`chezmoi`, `yadm`, `stow`) also solve the broader sync problem, but require manual templating for path differences. Both projects above skip that by baking in knowledge of Claude Code's directory shape.
 

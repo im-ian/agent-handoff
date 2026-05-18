@@ -1,5 +1,5 @@
 ---
-description: Register this machine with claude-handoff and link (or create) a hub repository
+description: Register this machine with agent-handoff and link (or create) a hub repository
 argument-hint: "(no arguments — the slash command collects answers interactively)"
 allowed-tools: [Bash, Read, AskUserQuestion]
 ---
@@ -13,7 +13,11 @@ If the user already supplied `$ARGUMENTS`, just run `handoff init $ARGUMENTS` an
 Run, without arguments:
 
 ```bash
-test -f ~/.claude-handoff/config.json && cat ~/.claude-handoff/config.json || echo 'NO_CONFIG'
+STATE_DIR="${AGENT_HANDOFF_HOME:-${CLAUDE_HANDOFF_HOME:-$HOME/.agent-handoff}}"
+if [ ! -f "$STATE_DIR/config.json" ] && [ -f "$HOME/.claude-handoff/config.json" ]; then
+  STATE_DIR="$HOME/.claude-handoff"
+fi
+test -f "$STATE_DIR/config.json" && cat "$STATE_DIR/config.json" || echo 'NO_CONFIG'
 ```
 
 - `NO_CONFIG` → this is a **fresh install**.
@@ -33,7 +37,7 @@ Use `AskUserQuestion` with one question:
 
 Then depending on the choice:
 
-- **Create**: ask for the repo name (default suggestion: `claude-handoff-hub`). Validate it matches `^[A-Za-z0-9._-]{1,100}$`. This becomes `--create-hub <name>`.
+- **Create**: ask for the repo name (default suggestion: `agent-handoff-hub`). Validate it matches `^[A-Za-z0-9._-]{1,100}$`. This becomes `--create-hub <name>`.
 - **Existing**: ask for the full clone URL (e.g. `git@github.com:you/my-hub.git` or `https://github.com/you/my-hub.git`). Must be non-empty. This becomes `--hub <url>`.
 - **Skip**: you'll still need a URL to store in config. Ask for it (or let the user paste a placeholder they'll fix later). This becomes `--hub <url> --skip-clone`.
 
@@ -61,7 +65,7 @@ If this is an update (config exists):
 Assemble the command. Examples:
 
 ```bash
-handoff init --create-hub claude-handoff-hub --device macbook
+handoff init --create-hub agent-handoff-hub --device macbook
 handoff init --hub git@github.com:you/my-hub.git --device laptop
 handoff init --hub https://github.com/you/my-hub.git --device laptop --skip-clone
 handoff init --device macbook-pro --force   # update, rename device, reset editables
@@ -82,6 +86,6 @@ If the CLI exited non-zero, tell the user what failed (hub URL invalid, `gh` not
 
 ### Fallbacks
 
-- If `handoff` is not on PATH, tell the user to install claude-handoff — see https://github.com/im-ian/claude-handoff — and stop.
+- If `handoff` is not on PATH, tell the user to install agent-handoff — see https://github.com/im-ian/agent-handoff — and stop.
 - If `gh` is needed (for `--create-hub`) but missing or unauthenticated, the CLI will error with a clear message; forward that message and suggest `brew install gh` / `gh auth login` accordingly.
 - Never call `handoff init` without `--device` AND one of (`--hub` or `--create-hub`) on a fresh install. Missing flags would trigger the CLI's TTY prompts, which hang through the Bash tool.

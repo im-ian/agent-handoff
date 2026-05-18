@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install claude-handoff slash commands into ~/.claude/commands/ via symlinks.
+# Install agent-handoff slash commands into ~/.claude/commands/ via symlinks.
 # Symlinks mean updates to this repo automatically reach your Claude Code session.
 
 set -euo pipefail
@@ -34,7 +34,7 @@ if ! command -v handoff >/dev/null 2>&1; then
   echo "⚠ \`handoff\` is not on your PATH. The slash commands will fail until the CLI is installed."
   echo "  From the repo root:    npm link          (works on any Node install)"
   echo "  pnpm users:            pnpm link --global   (requires \`pnpm setup\` first)"
-  echo "  Once published:        npm install -g claude-handoff"
+  echo "  Once published:        npm install -g @im-ian/agent-handoff"
 fi
 
 echo ""

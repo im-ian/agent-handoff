@@ -13,6 +13,13 @@ const workIdentity = {
   extra: [],
 };
 
+const codexIdentity = {
+  appDir: '/Users/jthefloor/.codex',
+  appToken: TOKENS.CODEX,
+  home: '/Users/jthefloor',
+  extra: [],
+};
+
 describe('buildSubs', () => {
   it('orders longest "from" first (claudeDir before home)', () => {
     const subs = buildSubs(macIdentity);
@@ -42,6 +49,15 @@ describe('buildSubs', () => {
       extra: [{ from: '', to: 'x' }, { from: 'x', to: '' }],
     });
     expect(subs.some((s) => !s.from || !s.to)).toBe(false);
+  });
+
+  it('supports non-Claude app directories with profile-specific tokens', () => {
+    const subs = buildSubs(codexIdentity);
+    expect(subs[0]?.from).toBe('/Users/jthefloor/.codex');
+    expect(subs[0]?.to).toBe(TOKENS.CODEX);
+
+    const tokenized = tokenize('config=/Users/jthefloor/.codex/config.toml', subs);
+    expect(tokenized).toBe(`config=${TOKENS.CODEX}/config.toml`);
   });
 });
 

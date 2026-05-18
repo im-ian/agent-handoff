@@ -1,18 +1,27 @@
-import { promises as fs } from 'node:fs';
+import { existsSync, promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { z } from 'zod';
 import type { DeviceConfig } from '../types.js';
+import { normalizeConfigShape } from './profiles.js';
 
-// Set CLAUDE_HANDOFF_HOME to isolate state (useful for dry-runs / tests / multi-user machines).
-const CONFIG_DIR = process.env.CLAUDE_HANDOFF_HOME ?? path.join(os.homedir(), '.claude-handoff');
+// Set AGENT_HANDOFF_HOME to isolate state (useful for dry-runs / tests / multi-user machines).
+// CLAUDE_HANDOFF_HOME and ~/.claude-handoff remain supported for existing installs.
+const LEGACY_CONFIG_DIR = path.join(os.homedir(), '.claude-handoff');
+const DEFAULT_CONFIG_DIR = path.join(os.homedir(), '.agent-handoff');
+const CONFIG_DIR =
+  process.env.AGENT_HANDOFF_HOME ??
+  process.env.CLAUDE_HANDOFF_HOME ??
+  (existsSync(LEGACY_CONFIG_DIR) ? LEGACY_CONFIG_DIR : DEFAULT_CONFIG_DIR);
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 const HUB_DIR = path.join(CONFIG_DIR, 'hub');
 
 const configSchema = z.object({
+  profile: z.enum(['claude', 'codex']).default('claude'),
   device: z.string().min(1),
   hubRemote: z.string().min(1),
-  claudeDir: z.string(),
+  appDir: z.string().optional(),
+  claudeDir: z.string().optional(),
   substitutions: z.array(z.object({ from: z.string(), to: z.string() })),
   scope: z.object({
     include: z.array(z.string()),
@@ -34,7 +43,7 @@ export const paths = {
 export async function readConfig(): Promise<DeviceConfig | null> {
   try {
     const raw = await fs.readFile(CONFIG_FILE, 'utf8');
-    return configSchema.parse(JSON.parse(raw));
+    return normalizeConfigShape(configSchema.parse(JSON.parse(raw)));
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw err;

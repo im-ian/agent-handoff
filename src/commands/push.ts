@@ -7,6 +7,7 @@ import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest, commitAndPush } from '../core/git.js';
 import { listScopedFiles } from '../core/scope.js';
 import { buildSubs, tokenize } from '../core/tokenize.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 import { upsertDevice } from '../core/manifest.js';
 import { isBinaryFile, copyFileEnsureDir } from '../core/fs-util.js';
 import { groupByFile, scanFiles, type SecretFinding } from '../core/secret-scanner.js';
@@ -22,6 +23,8 @@ export interface PushOptions {
 
 export async function pushCommand(opts: PushOptions): Promise<void> {
   const cfg = await requireConfig();
+  const appDir = resolveConfigAppDir(cfg);
+  const profile = getProfile(cfg.profile);
 
   if (opts.dryRun) {
     await pushDryRun(cfg, opts);
@@ -31,7 +34,7 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
   await ensureClone(paths.hubDir, cfg.hubRemote);
   await pullLatest(paths.hubDir).catch(() => undefined);
 
-  const files = await listScopedFiles(cfg.claudeDir, cfg.scope);
+  const files = await listScopedFiles(appDir, cfg.scope);
   console.log(pc.dim(`Scope matched ${files.length} files.`));
   if (files.length === 0) {
     console.log(pc.yellow('Nothing matched the include rules — check your scope config.'));
@@ -43,7 +46,7 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
     console.log(pc.dim('Secret scan bypassed (--allow-secrets).'));
   } else {
     const filesToScan = files.filter((f) => !cfg.secretPolicy.allow.includes(f));
-    const findings = await scanFiles(cfg.claudeDir, filesToScan);
+    const findings = await scanFiles(appDir, filesToScan);
     if (findings.length > 0) {
       const visibility = await detectHubVisibility(cfg.hubRemote);
       printScanReport(findings, visibility, cfg.hubRemote);
@@ -68,7 +71,8 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
   }
 
   const subs = buildSubs({
-    claudeDir: cfg.claudeDir,
+    appDir,
+    appToken: profile.pathToken,
     home: os.homedir(),
     extra: cfg.substitutions,
   });
@@ -80,7 +84,7 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
 
   let byteCount = 0;
   for (const rel of allowedFiles) {
-    const src = path.join(cfg.claudeDir, rel);
+    const src = path.join(appDir, rel);
     const dst = path.join(snapshotRoot, rel);
     if (await isBinaryFile(src)) {
       await copyFileEnsureDir(src, dst);
@@ -121,14 +125,17 @@ export async function pushCommand(opts: PushOptions): Promise<void> {
 // ---------- dry-run ----------
 
 async function pushDryRun(cfg: DeviceConfig, opts: PushOptions): Promise<void> {
+  const appDir = resolveConfigAppDir(cfg);
+  const profile = getProfile(cfg.profile);
   console.log(pc.bold('Dry-run — no network, no writes, no commits, no pushes.'));
   console.log();
   console.log(pc.bold('Device:     ') + pc.cyan(cfg.device));
+  console.log(pc.bold('Profile:    ') + pc.cyan(profile.name));
   console.log(pc.bold('Hub remote: ') + cfg.hubRemote);
-  console.log(pc.bold('Claude dir: ') + cfg.claudeDir);
+  console.log(pc.bold('App dir:    ') + appDir);
   console.log();
 
-  const files = await listScopedFiles(cfg.claudeDir, cfg.scope);
+  const files = await listScopedFiles(appDir, cfg.scope);
   console.log(pc.bold(`Scope matched ${files.length} file(s):`));
   for (const f of files) console.log(`  ${pc.dim('•')} ${f}`);
   if (files.length === 0) {
@@ -142,7 +149,7 @@ async function pushDryRun(cfg: DeviceConfig, opts: PushOptions): Promise<void> {
     scannerNote = pc.dim('Scanner bypassed (--allow-secrets).');
   } else {
     const filesToScan = files.filter((f) => !cfg.secretPolicy.allow.includes(f));
-    const findings = await scanFiles(cfg.claudeDir, filesToScan);
+    const findings = await scanFiles(appDir, filesToScan);
     if (findings.length > 0) {
       const visibility = await detectHubVisibility(cfg.hubRemote);
       printScanReport(findings, visibility, cfg.hubRemote);
@@ -155,7 +162,8 @@ async function pushDryRun(cfg: DeviceConfig, opts: PushOptions): Promise<void> {
   }
 
   const subs = buildSubs({
-    claudeDir: cfg.claudeDir,
+    appDir,
+    appToken: profile.pathToken,
     home: os.homedir(),
     extra: cfg.substitutions,
   });
@@ -164,7 +172,7 @@ async function pushDryRun(cfg: DeviceConfig, opts: PushOptions): Promise<void> {
   let textFiles = 0;
   let binaryFiles = 0;
   for (const rel of files) {
-    const src = path.join(cfg.claudeDir, rel);
+    const src = path.join(appDir, rel);
     if (await isBinaryFile(src)) {
       binaryFiles++;
       totalBytes += (await fs.stat(src)).size;

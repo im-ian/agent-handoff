@@ -2,6 +2,7 @@ import pc from 'picocolors';
 import { paths, readConfig } from '../core/config.js';
 import { readManifest } from '../core/manifest.js';
 import { ensureClone, git, pullLatest } from '../core/git.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 
 export async function statusCommand(_opts: unknown): Promise<void> {
   const cfg = await readConfig();
@@ -11,8 +12,11 @@ export async function statusCommand(_opts: unknown): Promise<void> {
     return;
   }
 
+  const profile = getProfile(cfg.profile);
   console.log(pc.bold('Device: ') + pc.cyan(cfg.device));
+  console.log(pc.bold('Profile:') + ' ' + pc.cyan(profile.name));
   console.log(pc.bold('Hub:    ') + cfg.hubRemote);
+  console.log(pc.bold('App dir:') + ' ' + resolveConfigAppDir(cfg));
   console.log(pc.bold('Local:  ') + paths.hubDir);
 
   try {

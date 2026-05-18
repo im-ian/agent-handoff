@@ -27,4 +27,4 @@ Surface CLI output verbatim. Errors (missing name, no platform commands, not ini
 ### Fallbacks
 
 - If `$ARGUMENTS` is empty, run `handoff deps --help` and surface its output instead.
-- If `~/.claude-handoff/config.json` is missing, suggest `/handoff-init` first.
+- If `~/.agent-handoff/config.json` is missing, suggest `/handoff-init` first.

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" role="img" aria-labelledby="title">
-  <title id="title">claude-handoff</title>
+  <title id="title">agent-handoff</title>
 
   <text x="600" y="56" text-anchor="middle"
         font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
-        font-size="34" font-weight="600" fill="#18181b">claude-handoff</text>
+        font-size="34" font-weight="600" fill="#18181b">agent-handoff</text>
 
   <g fill="none" stroke="#27272a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
     <g transform="translate(180, 100)">
@@ -27,5 +27,5 @@
 
   <text x="600" y="265" text-anchor="middle"
         font-family="-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif"
-        font-size="14" fill="#71717a" letter-spacing="0.5">~/.claude/  ·  device-aware  ·  path-tokenized  ·  secret-scanned</text>
+        font-size="14" fill="#71717a" letter-spacing="0.5">~/.claude/ + ~/.codex/  ·  device-aware  ·  path-tokenized  ·  secret-scanned</text>
 </svg>

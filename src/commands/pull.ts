@@ -6,6 +6,7 @@ import prompts from 'prompts';
 import { paths, requireConfig } from '../core/config.js';
 import { ensureClone, pullLatest } from '../core/git.js';
 import { buildSubs, resolve } from '../core/tokenize.js';
+import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 import { readManifest } from '../core/manifest.js';
 import { listScopedFiles } from '../core/scope.js';
 import {
@@ -26,6 +27,8 @@ export interface PullOptions {
 
 export async function pullCommand(opts: PullOptions): Promise<void> {
   const cfg = await requireConfig();
+  const appDir = resolveConfigAppDir(cfg);
+  const profile = getProfile(cfg.profile);
   await ensureClone(paths.hubDir, cfg.hubRemote);
   await pullLatest(paths.hubDir);
 
@@ -49,18 +52,19 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
   }
 
   const subs = buildSubs({
-    claudeDir: cfg.claudeDir,
+    appDir,
+    appToken: profile.pathToken,
     home: os.homedir(),
     extra: cfg.substitutions,
   });
 
   if (opts.confirm && !opts.dryRun) {
-    const localScoped = (await pathExists(cfg.claudeDir))
-      ? await listScopedFiles(cfg.claudeDir, cfg.scope)
+    const localScoped = (await pathExists(appDir))
+      ? await listScopedFiles(appDir, cfg.scope)
       : [];
     const summary = await diffTrees({
       snapshotRoot,
-      localRoot: cfg.claudeDir,
+      localRoot: appDir,
       localScoped,
       resolveContent: (text) => resolve(text, subs),
     });
@@ -87,7 +91,7 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
       {
         type: 'confirm',
         name: 'proceed',
-        message: `Apply these changes to ${cfg.claudeDir}?`,
+        message: `Apply these changes to ${appDir}?`,
         initial: false,
       },
       { onCancel: () => ({ proceed: false }) },
@@ -100,7 +104,7 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
   }
 
   const files = await walkFiles(snapshotRoot);
-  console.log(pc.dim(`Applying ${files.length} files from "${source}" → ${cfg.claudeDir}`));
+  console.log(pc.dim(`Applying ${files.length} files from "${source}" → ${appDir}`));
 
   if (opts.dryRun) {
     for (const rel of files) console.log(`  ${pc.cyan('[dry]')} ${rel}`);
@@ -108,11 +112,11 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
     return;
   }
 
-  await fs.mkdir(cfg.claudeDir, { recursive: true });
+  await fs.mkdir(appDir, { recursive: true });
 
   for (const rel of files) {
     const src = path.join(snapshotRoot, rel);
-    const dst = path.join(cfg.claudeDir, rel);
+    const dst = path.join(appDir, rel);
     if (await isBinaryFile(src)) {
       await copyFileEnsureDir(src, dst);
     } else {
@@ -123,7 +127,7 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
     }
   }
 
-  console.log(pc.green(`✓ pulled "${source}" into ${cfg.claudeDir}`));
+  console.log(pc.green(`✓ pulled "${source}" into ${appDir}`));
   if (source !== cfg.device) {
     console.log(pc.dim('Pulled files within scope were overwritten; files outside scope are untouched.'));
   }

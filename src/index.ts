@@ -13,12 +13,14 @@ const program = new Command();
 
 program
   .name('handoff')
-  .description('Hand off your Claude Code setup between devices.')
+  .description('Hand off your agent setup between devices.')
   .version('1.0.0');
 
 program
   .command('init')
   .description('Register this device, or update an existing config. Prompts reuse current values as defaults.')
+  .option('--profile <name>', 'Agent profile to sync: claude or codex')
+  .option('--app-dir <path>', 'Agent config directory override (defaults to ~/.claude or ~/.codex by profile)')
   .option('--hub <url>', 'Existing hub repository URL (git@ or https://)')
   .option('--create-hub <name>', 'Create a NEW private GitHub repo with this name via `gh` and use it as the hub')
   .option('--device <name>', 'Device name (default: hostname on first init, current value on update)')
@@ -28,7 +30,7 @@ program
 
 program
   .command('push')
-  .description("Snapshot this device's Claude setup to the hub.")
+  .description("Snapshot this device's agent setup to the hub.")
   .option('-m, --message <msg>', 'Commit message override')
   .option('--allow-secrets', 'Bypass the secret scanner entirely (use only when you are sure)')
   .option('--skip-on-secrets', 'Non-interactive: auto-skip any file with detected secret findings')
