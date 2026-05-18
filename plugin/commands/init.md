@@ -77,9 +77,9 @@ On success, summarize in one short paragraph:
 - Whether this was a fresh install or an update.
 - The device name.
 - The hub URL (and note if it was just created via `gh`).
-- Suggest `/handoff-push` as the next step.
+- Suggest `/agent-handoff:push` as the next step.
 
-If the CLI exited non-zero, tell the user what failed (hub URL invalid, `gh` not authenticated, device name invalid, etc.) and offer to re-run `/handoff-init` to fix it.
+If the CLI exited non-zero, tell the user what failed (hub URL invalid, `gh` not authenticated, device name invalid, etc.) and offer to re-run `/agent-handoff:init` to fix it.
 
 ### Fallbacks
 

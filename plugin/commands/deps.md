@@ -21,10 +21,10 @@ Surface CLI output verbatim. Errors (missing name, no platform commands, not ini
 
 ### Common follow-ups
 
-- After `add` → suggest `/handoff-doctor` to verify the binary is now declared, or `/handoff-bootstrap` to install it on the current machine.
+- After `add` → suggest `/agent-handoff:doctor` to verify the binary is now declared, or `/agent-handoff:bootstrap` to install it on the current machine.
 - After `remove` → no follow-up required; the next push from any device will reflect the removal.
 
 ### Fallbacks
 
 - If `$ARGUMENTS` is empty, run `handoff deps --help` and surface its output instead.
-- If `~/.agent-handoff/config.json` is missing, suggest `/handoff-init` first.
+- If `~/.agent-handoff/config.json` is missing, suggest `/agent-handoff:init` first.

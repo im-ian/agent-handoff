@@ -19,13 +19,17 @@ shopt -s nullglob
 installed=0
 for cmd in "$PLUGIN_DIR/commands/"*.md; do
   name="$(basename "$cmd")"
-  target="$TARGET_DIR/$name"
+  # Source filenames are short (init.md, push.md, …) so the plugin marketplace
+  # install surfaces as /agent-handoff:init. For this legacy flat install we
+  # prefix with handoff- to avoid colliding with built-in slash commands like
+  # /init.
+  target="$TARGET_DIR/handoff-$name"
   if [ -e "$target" ] && [ ! -L "$target" ]; then
     echo "skip (non-symlink already exists): $target" >&2
     continue
   fi
   ln -sf "$cmd" "$target"
-  echo "linked: /${name%.md}"
+  echo "linked: /handoff-${name%.md}"
   installed=$((installed + 1))
 done
 

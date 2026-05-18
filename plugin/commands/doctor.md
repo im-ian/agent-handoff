@@ -15,13 +15,13 @@ Then summarize for the user:
 
 - **Exit 0** ("All dependencies satisfied") → confirm everything is OK in one line.
 - **Exit 1** (one or more missing) → list each missing binary with the file/line where it's used, and whether the manifest knows how to fix it:
-  - **Declared with install command** → suggest `/handoff-bootstrap` (or `handoff bootstrap`) as the next step.
-  - **Declared but no install command for current platform** → suggest `/handoff-deps add <name> --<platform> "..."` to add it.
-  - **Not declared** → suggest `/handoff-deps add <name> --darwin "..." --linux "..."` to register it.
+  - **Declared with install command** → suggest `/agent-handoff:bootstrap` (or `handoff bootstrap`) as the next step.
+  - **Declared but no install command for current platform** → suggest `/agent-handoff:deps add <name> --<platform> "..."` to add it.
+  - **Not declared** → suggest `/agent-handoff:deps add <name> --darwin "..." --linux "..."` to register it.
 
 If the user passed `--fix`, the CLI runs `bootstrap` automatically after diagnosis (which itself prompts before installing).
 
 ### Fallbacks
 
-- If `~/.agent-handoff/config.json` is missing, tell the user to run `/handoff-init` first.
+- If `~/.agent-handoff/config.json` is missing, tell the user to run `/agent-handoff:init` first.
 - If hooks.json doesn't exist (`No external dependencies referenced...` output), confirm there's nothing to check and stop.

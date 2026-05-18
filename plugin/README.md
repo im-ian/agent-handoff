@@ -4,15 +4,20 @@ Thin wrapper that exposes the `handoff` CLI as Claude Code slash commands.
 
 ## Commands
 
-| Slash command | CLI equivalent |
-|---------------|----------------|
-| `/handoff-init` | `handoff init` |
-| `/handoff-push` | `handoff push` |
-| `/handoff-pull` | `handoff pull` |
-| `/handoff-diff` | `handoff diff` |
-| `/handoff-status` | `handoff status` |
+Names depend on how the plugin was installed:
 
-Arguments are passed through via `$ARGUMENTS`, so `/handoff-pull --from work-pc --confirm` works exactly as expected.
+| Marketplace plugin | Legacy `install.sh` | CLI equivalent |
+|--------------------|---------------------|----------------|
+| `/agent-handoff:init` | `/handoff-init` | `handoff init` |
+| `/agent-handoff:push` | `/handoff-push` | `handoff push` |
+| `/agent-handoff:pull` | `/handoff-pull` | `handoff pull` |
+| `/agent-handoff:diff` | `/handoff-diff` | `handoff diff` |
+| `/agent-handoff:status` | `/handoff-status` | `handoff status` |
+| `/agent-handoff:doctor` | `/handoff-doctor` | `handoff doctor` |
+| `/agent-handoff:bootstrap` | `/handoff-bootstrap` | `handoff bootstrap` |
+| `/agent-handoff:deps` | `/handoff-deps` | `handoff deps …` |
+
+Arguments are passed through via `$ARGUMENTS`, so `/agent-handoff:pull --from work-pc --confirm` works exactly as expected.
 
 ## Install
 
@@ -41,10 +46,10 @@ CLAUDE_HOME=/path/to/claude-home plugin/install.sh
 
 ### Manual
 
-Symlink (or copy) individual command files into `~/.claude/commands/`:
+Symlink (or copy) individual command files into `~/.claude/commands/`, prefixing the target name with `handoff-` to avoid colliding with built-in slash commands:
 
 ```bash
-ln -s "$(pwd)/plugin/commands/handoff-push.md" ~/.claude/commands/
+ln -s "$(pwd)/plugin/commands/push.md" ~/.claude/commands/handoff-push.md
 ```
 
 ## Interactive prompts caveat
