@@ -13,10 +13,7 @@ If the user already supplied `$ARGUMENTS`, just run `handoff init $ARGUMENTS` an
 Run, without arguments:
 
 ```bash
-STATE_DIR="${AGENT_HANDOFF_HOME:-${CLAUDE_HANDOFF_HOME:-$HOME/.agent-handoff}}"
-if [ ! -f "$STATE_DIR/config.json" ] && [ -f "$HOME/.claude-handoff/config.json" ]; then
-  STATE_DIR="$HOME/.claude-handoff"
-fi
+STATE_DIR="${AGENT_HANDOFF_HOME:-$HOME/.agent-handoff}"
 test -f "$STATE_DIR/config.json" && cat "$STATE_DIR/config.json" || echo 'NO_CONFIG'
 ```
 
