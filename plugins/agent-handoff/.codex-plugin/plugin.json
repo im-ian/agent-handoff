@@ -17,10 +17,11 @@
     "handoff",
     "dotfiles"
   ],
+  "skills": "./skills/",
   "interface": {
     "displayName": "Agent Handoff",
     "shortDescription": "Sync agent setup across devices",
-    "longDescription": "Use the handoff CLI from Codex slash commands to initialize, push, pull, diff, diagnose, and bootstrap Codex profile snapshots. The CLI handles path tokenization, secret scanning, and hub repository storage.",
+    "longDescription": "Use the handoff CLI from Codex with bundled workflow guidance to initialize, push, pull, diff, diagnose, and bootstrap Codex profile snapshots. The CLI handles path tokenization, secret scanning, and hub repository storage.",
     "developerName": "im-ian",
     "category": "Productivity",
     "capabilities": [

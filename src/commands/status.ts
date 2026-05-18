@@ -42,7 +42,8 @@ export async function statusCommand(_opts: unknown): Promise<void> {
       const marker = name === cfg.device ? pc.green('●') : pc.dim('○');
       const time = new Date(info.latest.pushedAt).toLocaleString();
       const label = name.padEnd(20);
-      const fileInfo = `${info.latest.fileCount} files`;
+      const profileInfo = info.latest.profile ? `${info.latest.profile}, ` : '';
+      const fileInfo = `${profileInfo}${info.latest.fileCount} files`;
       console.log(`  ${marker} ${pc.cyan(label)} ${pc.dim(time)}  ${pc.dim(fileInfo)}`);
     }
   } catch (err) {

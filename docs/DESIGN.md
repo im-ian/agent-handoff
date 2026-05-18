@@ -21,11 +21,16 @@ A single user may run Claude Code or Codex on 3+ machines. A simple "one canonic
 <hub-repo>/
 ├── devices/
 │   ├── macbook-pro/
-│   │   ├── snapshot/           # tokenized profile directory subset
-│   │   │   ├── agents/
-│   │   │   ├── hooks/
-│   │   │   ├── skills/
-│   │   │   └── ...
+│   │   ├── snapshot/           # tokenized scoped files by agent profile
+│   │   │   ├── .claude/
+│   │   │   │   ├── agents/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── skills/
+│   │   │   │   └── ...
+│   │   │   └── .codex/
+│   │   │       ├── AGENTS.md
+│   │   │       ├── config.toml
+│   │   │       └── ...
 │   │   └── version.json        # metadata for this device's latest push
 │   ├── desktop-home/
 │   │   └── ...
@@ -39,11 +44,11 @@ A single user may run Claude Code or Codex on 3+ machines. A simple "one canonic
 ### Versioning — N × M
 
 - Each **device** owns its own directory under `devices/<device-name>/`.
-- Each **push** from a device is a git commit that updates that device's directory.
+- Each **push** from a device is a git commit that updates that device's current profile directory under `snapshot/.claude/` or `snapshot/.codex/`.
 - Git history provides M versions per device; `devices/` enumerates N devices.
 - A device can pull:
   - **own latest** (re-sync this machine with what it last pushed)
-  - **peer device** (`handoff pull --from work-pc`) → applies another device's state locally after token resolution
+  - **peer device** (`handoff pull --from work-pc`) → applies another device's state for the current profile locally after token resolution
   - **specific version** (`handoff pull --from work-pc --at <sha>`)
 - No implicit merging — pulls are explicit, user-directed operations.
 
@@ -169,7 +174,7 @@ Set `AGENT_HANDOFF_HOME` to a scratch path (e.g. `/tmp/trial`) to experiment wit
 | Command | Purpose |
 |---------|---------|
 | `handoff init [--profile claude\|codex]` | Register this device, clone/link hub repo, write local config |
-| `handoff push [--dry-run]` | Tokenize + copy scoped files to `hub/devices/<this>/snapshot/`, commit, push; `--dry-run` reports scope/scan/size with zero side effects |
+| `handoff push [--dry-run]` | Tokenize + copy scoped files to `hub/devices/<this>/snapshot/.claude/` or `hub/devices/<this>/snapshot/.codex/`, commit, push; `--dry-run` reports scope/scan/size with zero side effects |
 | `handoff pull [--from <device>] [--confirm]` | Resolve + apply another device's snapshot to the configured app directory; `--confirm` shows a diff preview and asks y/N before applying |
 | `handoff diff [--from <device>] [-p]` | Preview changes before a pull — token-aware, binary-aware, shows unified patches |
 | `handoff status` | Show current device, hub remote, known devices, last push timestamps |

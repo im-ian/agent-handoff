@@ -21,7 +21,7 @@ If you use Claude Code or Codex on more than one machine — say a home Mac and 
 
 `agent-handoff` automates the whole thing. Per-machine paths are rewritten to portable tokens so configs resolve correctly wherever you pull them, a scanner catches secrets (API keys, tokens) before anything leaves your device, and a shared hub repository keeps every machine's configs and push history in one place.
 
-Claude Code users can run it through slash commands. Codex users can use the same `handoff` CLI directly with `--profile codex`.
+Claude Code users can run it through slash commands. Codex users run the same `handoff` CLI directly with `--profile codex`; the Codex plugin bundles workflow guidance for Codex, not slash commands.
 
 ---
 
@@ -56,13 +56,22 @@ handoff init --profile codex --hub git@github.com:you/agent-handoff-hub.git --de
 handoff push
 ```
 
-On another machine — after the same install + `/agent-handoff:init`:
+Optionally install the local Codex plugin so new Codex sessions can load the Agent Handoff skill:
+
+```bash
+codex plugin marketplace add /path/to/agent-handoff
+codex
+```
+
+Then open `/plugins`, install/enable **Agent Handoff**, restart Codex, and ask Codex in natural language, for example: "use agent-handoff to check status" or "push my Codex setup". The actual execution path is still the `handoff` CLI.
+
+On another Claude Code machine — after the same install + `/agent-handoff:init`:
 
 ```
 /agent-handoff:pull       # pick the source device, preview diff, apply
 ```
 
-Every slash command drives prompts through `AskUserQuestion` (device pickers, secret-scan policy, install confirmations) — no interactive CLI hangs, no flags to memorize.
+Claude Code slash commands drive prompts through `AskUserQuestion` (device pickers, secret-scan policy, install confirmations). Codex uses CLI commands plus the bundled skill guidance.
 
 ---
 
@@ -80,32 +89,62 @@ Updates ride through `/plugin update`.
 
 ### Codex plugin
 
-This repo also ships a Codex plugin at `plugins/agent-handoff/` with slash commands for the Codex profile. The repo-local marketplace entry lives at `.agents/plugins/marketplace.json`.
+This repo also ships a Codex plugin at `plugins/agent-handoff/`. The repo-local marketplace entry lives at `.agents/plugins/marketplace.json`.
 
-After adding/installing the local marketplace in Codex, the commands drive the same CLI with `--profile codex` where needed:
+Codex v0.130 uses `/plugins` in the TUI. There is no `/plugin marketplace add ...` slash command. Add the marketplace from your terminal, then install/enable it from `/plugins`:
+
+```bash
+codex plugin marketplace add /path/to/agent-handoff
+codex
+```
+
+Inside Codex:
 
 ```
-/init      # runs handoff init --profile codex ...
-/push      # dry-run + secret policy + push
-/pull      # source selection + preview + apply
-/status    # current profile, app dir, hub, devices
+/plugins
+```
+
+Pick **Agent Handoff**, install/enable it, then restart Codex so the bundled skill is available.
+
+Important: Codex v0.130 plugin docs expose plugins as skills, apps, MCP servers, and hooks. Plugin `commands/` files are not loaded as TUI slash commands, so `/push`, `/agent-handoff:push`, and similar entries will not appear in the `/` palette. Use the terminal CLI or ask Codex to use the Agent Handoff skill.
+
+If you only need the sync functionality, the terminal CLI is enough:
+
+```bash
+handoff init --profile codex --hub git@github.com:you/agent-handoff-hub.git --device my-mac
+handoff push
+handoff pull --from other-mac
 ```
 
 ### 2. `handoff` CLI backend
 
-The plugin is a thin wrapper — every slash command shells out to a `handoff` binary on your PATH. Until npm publish lands, install from source:
+The Claude Code plugin and Codex skill both rely on a `handoff` binary on your PATH. Until npm publish lands, install from source:
 
 ```bash
 git clone https://github.com/im-ian/agent-handoff.git && cd agent-handoff
 npm install && npm run build && npm link
 ```
 
-Verify with `/agent-handoff:status` inside Claude Code — if it runs without "command not found", you're set. In terminal, `handoff --version` prints `1.0.0`.
+Verify with `/agent-handoff:status` inside Claude Code, or `handoff --version` in a terminal for Codex. The CLI prints `1.0.0`.
 
 ### Uninstall
 
+Claude Code:
+
 ```
 /plugin uninstall agent-handoff@agent-handoff
+```
+
+Codex:
+
+```
+/plugins
+```
+
+Disable/uninstall **Agent Handoff** from the plugin browser, then remove the local marketplace entry if desired:
+
+```bash
+codex plugin marketplace remove agent-handoff
 ```
 
 ```bash
@@ -115,7 +154,7 @@ rm -rf ~/.agent-handoff               # local config + hub clone (remote untouch
 
 ---
 
-## Slash commands
+## Claude Code slash commands
 
 | Command | Purpose |
 |---|---|
@@ -163,7 +202,7 @@ So `"command": "node \"/Users/alice/.claude/hooks/x.js\""` becomes `"node \"${HA
 
 Every scoped text file (≤ 2 MB) is scanned for: Anthropic/OpenAI/GitHub/Google/AWS/Slack tokens, private key headers, JWTs, generic `password=` / `api_key=` literals.
 
-- **From `/agent-handoff:push`.** A `--dry-run` preflight surfaces findings, then `AskUserQuestion` offers skip flagged / upload everything / abort. Public or unknown-visibility hubs get an extra warning.
+- **From `/agent-handoff:push` in Claude Code.** A `--dry-run` preflight surfaces findings, then `AskUserQuestion` offers skip flagged / upload everything / abort. Public or unknown-visibility hubs get an extra warning.
 - **From the terminal, interactive.** Per-file prompt: *skip* / *upload anyway* / *abort*. Non-private hubs require a typed `yes` confirmation.
 - **False positives** (Django `SECRET_KEY` examples, test fixtures, password-pattern docs) → add file paths to `secretPolicy.allow` in config. Manual edits only — prevents click-fatigue from silently growing the list.
 
@@ -171,7 +210,7 @@ Every scoped text file (≤ 2 MB) is scanned for: Anthropic/OpenAI/GitHub/Google
 
 ## Dependency management
 
-Hooks invoke external CLIs (`gh`, `jq`, `clawd`, `rtk`, …). After a pull onto a fresh machine, those binaries may not be installed → hooks silently fail with `command not found`. Three slash commands address this:
+Hooks invoke external CLIs (`gh`, `jq`, `clawd`, `rtk`, …). After a pull onto a fresh machine, those binaries may not be installed → hooks silently fail with `command not found`. These Claude Code slash commands address this:
 
 ```
 /agent-handoff:deps add gh --darwin "brew install gh" --linux "apt install gh"
@@ -192,21 +231,23 @@ v1 detects from `hooks/hooks.json` only; `scripts/**/*.sh` parsing comes in v1.1
 ```
 <hub>/
 ├── devices/<name>/
-│   ├── snapshot/            # tokenized scoped files
+│   ├── snapshot/            # tokenized scoped files by agent profile
+│   │   ├── .claude/
+│   │   └── .codex/
 │   ├── version.json         # timestamp, file count, byte count, host
 │   └── dependencies.json    # declared external deps for this device
 └── manifest.json            # registry of all devices
 ```
 
-One git commit on the hub = one push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/agent-handoff:pull --from X` always applies X's complete snapshot atomically.
+One git commit on the hub = one profile push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/agent-handoff:pull --from X` always applies X's snapshot for the current profile atomically.
 
-When `/agent-handoff:init` creates a new hub via `--create-hub`, it seeds a `README.md` covering the layout, the recovery playbook (install plugin via marketplace → install CLI → `handoff init` → `handoff pull`), and the day-to-day commands — so the hub repo itself documents how to restore from it.
+When `handoff init --create-hub` creates a new hub, it seeds a `README.md` covering the layout, the recovery playbook (install plugin via marketplace → install CLI → `handoff init` → `handoff pull`), and the day-to-day commands — so the hub repo itself documents how to restore from it.
 
 ---
 
 ## Configuration
 
-`~/.agent-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `/agent-handoff:init` writes a sensible default.
+`~/.agent-handoff/config.json` — full schema in [`docs/DESIGN.md`](docs/DESIGN.md). Most users never touch this file; `handoff init` writes a sensible default.
 
 ```json
 {
@@ -226,7 +267,7 @@ When `/agent-handoff:init` creates a new hub via `--create-hub`, it seeds a `REA
 
 ## Terminal usage (optional)
 
-Every slash command is a thin wrapper around a matching `handoff <subcommand>` in your shell. If you prefer the terminal, `handoff init`, `handoff push`, `handoff pull --from <device>`, `handoff doctor`, etc. all work identically — same flags, same output. `handoff <cmd> --help` for the full flag listing.
+Every Claude Code slash command is a thin wrapper around a matching `handoff <subcommand>` in your shell. In Codex, use the terminal CLI directly: `handoff init --profile codex`, `handoff push`, `handoff pull --from <device>`, `handoff doctor`, etc. `handoff <cmd> --help` shows the full flag listing.
 
 ---
 
@@ -262,7 +303,7 @@ Every slash command is a thin wrapper around a matching `handoff <subcommand>` i
 | Cross-device paths | Synced verbatim | Tokenized — `${HANDOFF_CLAUDE}` / `${HANDOFF_HOME}` so a hook written on `/Users/alice/…` runs correctly on `/Users/bob/…` |
 | External dep tracking | — | `doctor` / `bootstrap` / `deps` surface missing CLIs referenced by hooks |
 | Public sharing | `teleport-share` / `teleport-from <user>` | Private-hub only (by design) |
-| Plugin cache | Synced (plugins + marketplaces included) | Excluded — reinstall via `/plugin install` on each machine |
+| Plugin cache | Synced (plugins + marketplaces included) | Excluded — reinstall from Claude Code `/plugin install` or Codex `/plugins` on each machine |
 
 If you want a branch-merged single-source-of-truth with public sharing, pick teleport. If you want per-device isolation, path tokenization, and external-dep tracking, pick this one.
 

@@ -17,13 +17,15 @@ Private hub for [agent-handoff](https://github.com/im-ian/agent-handoff). Stores
 \`\`\`
 <this repo>/
 ├── devices/<name>/
-│   ├── snapshot/            # tokenized scoped files
+│   ├── snapshot/            # tokenized scoped files by agent profile
+│   │   ├── .claude/
+│   │   └── .codex/
 │   ├── version.json         # last push timestamp, file count, byte count
 │   └── dependencies.json    # declared external CLI deps for this device
 └── manifest.json            # registry of known devices and their latest push
 \`\`\`
 
-One commit on this repo = one push from one device. The agent-handoff CLI never cross-merges devices; \`handoff pull --from <device>\` applies the source device's full snapshot atomically.
+One commit on this repo = one profile push from one device. The agent-handoff CLI never cross-merges devices; \`handoff pull --from <device>\` applies the source device's snapshot for the current profile atomically.
 
 ## Restoring on a new machine
 

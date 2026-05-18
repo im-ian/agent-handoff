@@ -45,7 +45,7 @@ export async function pullCommand(opts: PullOptions): Promise<void> {
     process.exit(1);
   }
 
-  const snapshotRoot = path.join(paths.hubDir, 'devices', source, 'snapshot');
+  const snapshotRoot = path.join(paths.hubDir, 'devices', source, 'snapshot', profile.snapshotDirName);
   if (!(await pathExists(snapshotRoot))) {
     console.error(pc.red(`No snapshot directory at ${snapshotRoot}`));
     process.exit(1);
@@ -175,7 +175,8 @@ async function resolveSource(
   const choices = sortedEntries.map(([name, info]) => {
     const suffix = name === cfg.device ? pc.dim(' (this device)') : '';
     const when = new Date(info.latest.pushedAt).toLocaleString();
-    const meta = pc.dim(`— ${info.latest.fileCount} files, ${when}`);
+    const profile = info.latest.profile ? ` ${info.latest.profile},` : '';
+    const meta = pc.dim(`—${profile} ${info.latest.fileCount} files, ${when}`);
     return { title: `${name}${suffix}  ${meta}`, value: name };
   });
   const currentIdx = choices.findIndex((c) => c.value === cfg.device);

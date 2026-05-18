@@ -25,6 +25,7 @@ export interface AgentProfile {
   defaultDir: () => string;
   defaultScope: ScopeConfig;
   pathToken: string;
+  snapshotDirName: string;
   dependencyHookFiles: string[];
 }
 
@@ -35,6 +36,7 @@ const PROFILES: Record<ProfileName, AgentProfile> = {
     defaultDir: () => path.join(os.homedir(), '.claude'),
     defaultScope: DEFAULT_SCOPE,
     pathToken: TOKENS.CLAUDE,
+    snapshotDirName: '.claude',
     dependencyHookFiles: ['hooks/hooks.json'],
   },
   codex: {
@@ -43,6 +45,7 @@ const PROFILES: Record<ProfileName, AgentProfile> = {
     defaultDir: () => path.join(os.homedir(), '.codex'),
     defaultScope: CODEX_SCOPE,
     pathToken: TOKENS.CODEX,
+    snapshotDirName: '.codex',
     dependencyHookFiles: ['hooks.json'],
   },
 };

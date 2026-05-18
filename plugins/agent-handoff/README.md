@@ -1,21 +1,36 @@
 # Agent Handoff for Codex
 
-Codex plugin wrapper for the `handoff` CLI. It exposes slash commands for syncing the Codex profile (`~/.codex`) across machines.
+Codex plugin package for the `handoff` CLI. It bundles an Agent Handoff skill for syncing the Codex profile (`~/.codex`) across machines.
 
 ## Requirements
 
 - `handoff` CLI on `PATH`
-- An initialized hub via `/init` or `handoff init --profile codex ...`
+- An initialized hub via `handoff init --profile codex ...`
 
-## Commands
+## Install
 
-| Command | CLI flow |
+Codex v0.130 uses `/plugins` in the TUI. There is no `/plugin marketplace add ...` slash command.
+
+From a terminal:
+
+```bash
+codex plugin marketplace add /path/to/agent-handoff
+codex
+```
+
+Inside Codex, open `/plugins`, install/enable **Agent Handoff**, then restart Codex so the bundled skill is loaded.
+
+Codex v0.130 plugins expose skills, apps, MCP servers, and hooks. This plugin does not create TUI slash commands, so `/push` or `/agent-handoff:push` will not appear in the `/` command palette.
+
+## CLI Commands
+
+| Task | CLI flow |
 |---|---|
-| `/init` | `handoff init --profile codex ...` |
-| `/push` | `handoff push --dry-run`, then `handoff push` with an explicit secret policy if needed |
-| `/pull` | source selection, dry-run preview, confirmation, then `handoff pull --from <device>` |
-| `/diff` | `handoff diff` |
-| `/status` | `handoff status` |
-| `/doctor` | `handoff doctor` |
-| `/bootstrap` | `handoff bootstrap --dry-run`, then `handoff bootstrap --yes` after confirmation |
-| `/deps` | `handoff deps ...` |
+| Initialize | `handoff init --profile codex ...` |
+| Push | `handoff push --dry-run`, then `handoff push` with an explicit secret policy if needed |
+| Pull | source selection, dry-run preview, confirmation, then `handoff pull --from <device>` |
+| Diff | `handoff diff` |
+| Status | `handoff status` |
+| Doctor | `handoff doctor` |
+| Bootstrap | `handoff bootstrap --dry-run`, then `handoff bootstrap --yes` after confirmation |
+| Dependencies | `handoff deps ...` |

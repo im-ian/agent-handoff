@@ -29,6 +29,7 @@ export interface DeviceConfig {
 
 export interface DeviceVersion {
   device: string;
+  profile: ProfileName;
   pushedAt: string;
   host: string;
   fileCount: number;

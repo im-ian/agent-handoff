@@ -37,4 +37,4 @@ Use this command to initialize `agent-handoff` for the Codex profile. Always pas
    handoff init --profile codex --create-hub <repo> --device <device>
    ```
 
-6. Report the written config path, device name, hub URL, and suggest `/push` next.
+6. Report the written config path, device name, hub URL, and suggest `handoff push` next.

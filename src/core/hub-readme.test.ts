@@ -16,6 +16,13 @@ describe('renderHubReadme', () => {
     expect(pullIdx).toBeGreaterThan(marketplaceIdx);
   });
 
+  it('documents profile-separated snapshot directories', () => {
+    const rendered = renderHubReadme('hub');
+    expect(rendered).toContain('snapshot/            # tokenized scoped files by agent profile');
+    expect(rendered).toContain('.claude/');
+    expect(rendered).toContain('.codex/');
+  });
+
   it('keeps the unrendered template free of substitution leaks', () => {
     expect(HUB_README_TEMPLATE).toContain('{{hubName}}');
   });

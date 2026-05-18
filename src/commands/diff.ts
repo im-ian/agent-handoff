@@ -33,7 +33,7 @@ export async function diffCommand(opts: DiffOptions): Promise<void> {
     process.exit(1);
   }
 
-  const snapshotRoot = path.join(paths.hubDir, 'devices', source, 'snapshot');
+  const snapshotRoot = path.join(paths.hubDir, 'devices', source, 'snapshot', profile.snapshotDirName);
   if (!(await pathExists(snapshotRoot))) {
     console.error(pc.red(`No snapshot directory at ${snapshotRoot}`));
     process.exit(1);
