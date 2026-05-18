@@ -1,0 +1,39 @@
+{
+  "name": "agent-handoff",
+  "version": "1.0.0",
+  "description": "Sync Claude Code and Codex agent setup across devices with path tokenization, secret scanning, and a private hub repository.",
+  "author": {
+    "name": "im-ian",
+    "url": "https://github.com/im-ian"
+  },
+  "homepage": "https://github.com/im-ian/agent-handoff",
+  "repository": "https://github.com/im-ian/agent-handoff",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "claude-code",
+    "agents",
+    "sync",
+    "handoff",
+    "dotfiles"
+  ],
+  "interface": {
+    "displayName": "Agent Handoff",
+    "shortDescription": "Sync agent setup across devices",
+    "longDescription": "Use the handoff CLI from Codex slash commands to initialize, push, pull, diff, diagnose, and bootstrap Codex profile snapshots. The CLI handles path tokenization, secret scanning, and hub repository storage.",
+    "developerName": "im-ian",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/im-ian/agent-handoff",
+    "defaultPrompt": [
+      "Initialize Codex handoff for this machine",
+      "Push my Codex setup to the handoff hub",
+      "Pull another machine's Codex setup here"
+    ],
+    "brandColor": "#CC7C59",
+    "screenshots": []
+  }
+}
