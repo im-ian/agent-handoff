@@ -5,7 +5,8 @@ import { execa } from 'execa';
 import prompts from 'prompts';
 import pc from 'picocolors';
 import { paths, readConfig, writeConfig } from '../core/config.js';
-import { ensureClone } from '../core/git.js';
+import { commitAndPush, ensureClone, git } from '../core/git.js';
+import { renderHubReadme } from '../core/hub-readme.js';
 import { getProfile, resolveConfigAppDir } from '../core/profiles.js';
 import { pathExists } from '../core/fs-util.js';
 import type { DeviceConfig, ProfileName } from '../types.js';
@@ -156,6 +157,7 @@ export async function initCommand(opts: InitOptions): Promise<void> {
     try {
       await ensureClone(paths.hubDir, hubRemote);
       console.log(pc.green(`✓ hub ready`));
+      await seedHubReadmeIfEmpty(paths.hubDir, hubRemote);
     } catch (err) {
       console.log(pc.yellow(`⚠ hub clone failed: ${(err as Error).message}`));
       console.log(
@@ -239,4 +241,28 @@ async function createGitHubHub(name: string): Promise<string> {
   }
 
   return `https://github.com/${slug}.git`;
+}
+
+/**
+ * On a brand-new (empty) hub repo, write a README.md from the template so the
+ * repo doubles as its own recovery doc. Skips silently for any repo that
+ * already has commits — never overwrites existing content.
+ */
+async function seedHubReadmeIfEmpty(hubDir: string, hubRemote: string): Promise<void> {
+  const hasCommits = await git(hubDir, ['rev-parse', '--verify', 'HEAD'])
+    .then(() => true)
+    .catch(() => false);
+  if (hasCommits) return;
+
+  const hubName = hubRemote.split('/').pop()?.replace(/\.git$/, '') || 'agent-handoff-hub';
+  await fs.writeFile(path.join(hubDir, 'README.md'), renderHubReadme(hubName));
+  try {
+    const sha = await commitAndPush(hubDir, 'init: seed hub README with recovery instructions');
+    if (sha) {
+      console.log(pc.green(`✓ seeded hub README at ${sha.slice(0, 7)}`));
+    }
+  } catch (err) {
+    console.log(pc.yellow(`⚠ failed to push hub README: ${(err as Error).message}`));
+    console.log(pc.dim(`  README.md left in the local clone; commit and push manually if you want it.`));
+  }
 }

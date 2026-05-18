@@ -136,7 +136,7 @@ Conservative **allowlist** so unknown files never leak by accident. The default 
 
 - **Claude default include:** `agents/**`, `commands/**`, `hooks/**`, `skills/**`, `rules/**`, `mcp-configs/**`, `memory/**`, top-level `*.md`
 - **Codex default include:** `AGENTS.md`, `config.toml`, `hooks.json`, `rules/**`, `skills/**`, `commands/**`, `memories/**`, top-level `*.md`
-- **Hard-deny (always excluded):** `projects/**`, `sessions/**`, `cache/**`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`
+- **Hard-deny (always excluded):** `projects/**`, `sessions/**`, `cache/**`, `plugins/**`, `**/agent-handoff/**`, `commands/handoff-*.md`, `telemetry/**`, `backups/**`, `*.log`, `*.jsonl`, `**/.credentials.json`, `**/.env*`, `**/*credentials*`, `**/*secret*`, `.DS_Store`. The `plugins/**` / `agent-handoff` / `handoff-*` entries keep the agent-handoff plugin itself out of the hub so pulling never restores a stale copy of the very plugin you used to pull — always install it from the marketplace instead.
 - **Custom:** edit `scope.include` / `scope.excludeExtra` in `~/.agent-handoff/config.json`. `excludeExtra` stacks on the hard-deny list.
 
 ---
@@ -199,6 +199,8 @@ v1 detects from `hooks/hooks.json` only; `scripts/**/*.sh` parsing comes in v1.1
 ```
 
 One git commit on the hub = one push from one device. **N devices × M versions** emerges naturally from git history. No cross-device merging — `/agent-handoff:pull --from X` always applies X's complete snapshot atomically.
+
+When `/agent-handoff:init` creates a new hub via `--create-hub`, it seeds a `README.md` covering the layout, the recovery playbook (install plugin via marketplace → install CLI → `handoff init` → `handoff pull`), and the day-to-day commands — so the hub repo itself documents how to restore from it.
 
 ---
 
